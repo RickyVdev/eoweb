@@ -1,0 +1,25 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Modificar Cliente{% endblock %}
+
+{% block content %}
+
+<title>Modificar Cliente</title>
+<h2>Modificar Cliente</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>Nombre:</label><br>
+    <input type="text" name="nombre" value="{{ cliente.nombre }}" required><br><br>
+    <label>Email:</label><br>
+    <input type="email" name="email" value="{{ cliente.email }}" required><br><br>
+    <label>Teléfono:</label><br>
+    <input type="text" name="telefono" value="{{ cliente.telefono }}"><br><br>
+    <label>Dirección:</label><br>
+    <input type="text" name="direccion" value="{{ cliente.direccion }}"><br><br>
+    <button type="submit">Guardar cambios</button>
+</form>
+<a href="{% url 'lista_clientes' %}">Volver a la lista</a>
+
+
+{% endblock %}

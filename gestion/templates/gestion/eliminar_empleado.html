@@ -1,0 +1,18 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Eliminar Empleado{% endblock %}
+
+{% block content %}
+
+<title>Eliminar Empleado</title>
+<h2>Eliminar Empleado</h2>
+<p>¿Está seguro que desea eliminar al empleado "{{ empleado.nombre }}"?</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Sí, eliminar</button>
+    <a href="{% url 'lista_empleados' %}">Cancelar</a>
+</form>
+
+
+{% endblock %}

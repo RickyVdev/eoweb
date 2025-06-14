@@ -1,0 +1,24 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Agregar Cliente{% endblock %}
+
+{% block content %}
+<title>Agregar Cliente</title>
+<h2>Agregar Cliente</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>Nombre:</label><br>
+    <input type="text" name="nombre" required><br><br>
+    <label>Email:</label><br>
+    <input type="email" name="email" required><br><br>
+    <label>Teléfono:</label><br>
+    <input type="text" name="telefono"><br><br>
+    <label>Dirección:</label><br>
+    <input type="text" name="direccion"><br><br>
+    <button type="submit">Guardar</button>
+</form>
+<a href="{% url 'lista_clientes' %}">Volver a la lista</a>
+
+
+{% endblock %}

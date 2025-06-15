@@ -43,21 +43,35 @@
                             <div class="modal-body">
                             <div class="mb-3">
                                 <label for="username{{ empleado.id }}" class="form-label">Nombre de usuario:</label>
-                                <input type="text" name="username" id="username{{ empleado.id }}" class="form-control" value="{{ empleado.usuario.username }}" required>
+                                <input type="text" name="username" id="username{{ empleado.id }}" class="form-control"
+                                    value="{{ empleado.usuario.username }}" required
+                                    {% if not request.user.is_superuser and empleado.usuario.groups.all.0.name == 'Administrador' %}
+                                        readonly
+                                    {% endif %}>
                             </div>
                             <div class="mb-3">
                                 <label for="email{{ empleado.id }}" class="form-label">Email:</label>
-                                <input type="email" name="email" id="email{{ empleado.id }}" class="form-control" value="{{ empleado.usuario.email }}">
+                                <input type="email" name="email" id="email{{ empleado.id }}" class="form-control"
+                                    value="{{ empleado.usuario.email }}"
+                                    {% if not request.user.is_superuser and empleado.usuario.groups.all.0.name == 'Administrador' %}
+                                        readonly
+                                    {% endif %}>
                             </div>
+
                             <div class="mb-3">
                                 <label for="password{{ empleado.id }}" class="form-label">Nueva contraseña (opcional):</label>
-                                <input type="password" name="password" id="password{{ empleado.id }}" class="form-control">
+                                <input type="password" name="password" id="password{{ empleado.id }}" class="form-control"
+                                    {% if not request.user.is_superuser and empleado.usuario.groups.all.0.name == 'Administrador' %}
+                                        readonly
+                                    {% endif %}>
                                 <small class="text-muted">Déjalo en blanco si no deseas cambiarla.</small>
                             </div>
                             </div>
                             <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                            {% if request.user.is_superuser or empleado.usuario.groups.all.0.name != 'Administrador' %}
+                                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                            {% endif %}
                             </div>
                         </form>
                         </div>
@@ -74,11 +88,15 @@
                      <!-- ① Usuario clic-able (solo si existe) -->
                     <td>
                     {% if empleado.usuario %}
-                        <button class="btn btn-link p-0 m-0 align-baseline"
-                                data-bs-toggle="modal"
-                                data-bs-target="#editarUsuarioModal{{ empleado.id }}">
-                        {{ empleado.usuario.username }}
-                        </button>
+                        {% if request.user.is_superuser or empleado.usuario.groups.all.0.name != 'Administrador' %}
+                            <button class="btn btn-link p-0 m-0 align-baseline"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editarUsuarioModal{{ empleado.id }}">
+                                {{ empleado.usuario.username }}
+                            </button>
+                        {% else %}
+                            {{ empleado.usuario.username }}
+                        {% endif %}
                     {% else %}
                         —
                     {% endif %}
@@ -102,12 +120,14 @@
                     {% endif %}
                     </td>
                     <td>
-                        <a href="{% url 'modificar_empleado' empleado.id %}" class="btn btn-sm btn-warning me-2">
-                            <i class="bi bi-pencil"></i> Editar
-                        </a>
-                        <a href="{% url 'eliminar_empleado' empleado.id %}" class="btn btn-sm btn-danger">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </a>
+                        {% if request.user.is_superuser or empleado.usuario.groups.all.0.name != 'Administrador' %}
+                            <a href="{% url 'modificar_empleado' empleado.id %}" class="btn btn-sm btn-warning me-2">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <a href="{% url 'eliminar_empleado' empleado.id %}" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </a>
+                        {% endif %}
                         <!--
                         <a href="{% url 'enviar_invitacion_empleado' empleado.id %}" class="btn btn-sm btn-info">
                             <i class="bi bi-envelope"></i> Enviar invitación

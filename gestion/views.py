@@ -232,6 +232,15 @@ def eliminar_empleado(request, empleado_id):
 def editar_usuario_empleado(request, empleado_id):
     empleado = get_object_or_404(Empleado, id=empleado_id)
 
+    # Comprobamos si el usuario autenticado es un admin (no superuser)
+    usuario_actual_es_admin = request.user.groups.filter(name='Administrador').exists() and not request.user.is_superuser
+
+    # Comprobamos si el empleado a editar es también admin
+    empleado_es_admin = empleado.usuario.groups.filter(name='Administrador').exists()
+
+    # Si ambas condiciones se cumplen, solo se puede ver, no editar
+    solo_lectura = usuario_actual_es_admin and empleado_es_admin
+
     if request.method == 'POST':
         username = request.POST.get('username')
         email = request.POST.get('email')

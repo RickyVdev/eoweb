@@ -8,3 +8,4 @@ requests
 setuptools
 wheel
 python-decouple
+whitenoise

@@ -14,8 +14,9 @@ username = 'RickyV'
 email = 'rickyvdev18@gmail.com'
 password = 'Khasen18'
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(username=username, email=email, password=password)
-    print('Superusuario creado correctamente.')
-else:
-    print('El superusuario ya existe.')
+# Eliminar usuario anterior si ya existe
+User.objects.filter(username=username).delete()
+
+# Crear nuevo superusuario
+User.objects.create_superuser(username=username, email=email, password=password)
+print('Superusuario creado (forzado).')

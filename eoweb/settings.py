@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import dj_database_url
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,7 +31,11 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # SECURITY WARNING: don't run with debug turned on in production!
 #DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['eoweb.up.railway.app', 'localhost', '127.0.0.1']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.up.railway.app',
+]
 
 
 # Application definition

@@ -1,11 +1,8 @@
 Django==5.2.1
-gunicorn
+python-decouple==3.8
+dj-database-url==3.0.0
+whitenoise==6.6.0
+gunicorn==21.2.0
 sqlparse==0.5.3
-asgiref==3.8.1
-pytz
-tzdata
-requests
-setuptools
-wheel
-python-decouple
-whitenoise
+pytz==2022.6
+tzdata==2025.2

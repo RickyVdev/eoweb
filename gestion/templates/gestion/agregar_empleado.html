@@ -8,6 +8,7 @@
 <h2>Agregar Empleado</h2>
 <form method="post">
     {% csrf_token %}
+
     <label>Nombre:</label><br>
     <input type="text" name="nombre" required><br><br>
 
@@ -20,23 +21,36 @@
     <label>Cargo:</label><br>
     <input type="text" name="cargo"><br><br>
 
-    <!-- Nuevos campos para crear usuario -->
+    <!-- Nuevos campos -->
+    <label>Domicilio:</label><br>
+    <input type="text" name="domicilio"><br><br>
+
+    <label>Código Postal:</label><br>
+    <input type="text" name="codigo_postal"><br><br>
+
+    <label>RFC:</label><br>
+    <input type="text" name="rfc"><br><br>
+
+    <label>Fecha de Nacimiento:</label><br>
+    <input type="date" name="fecha_nacimiento"><br><br> 
+
+    <label>Tipo de Sangre:</label><br>
+    <input type="text" name="tipo_sangre"><br><br>
+
+    <!-- Datos de usuario -->
     <label>Nombre de usuario:</label><br>
     <input type="text" name="username" required><br><br>
 
     <label>Contraseña:</label><br>
     <input type="password" name="password" required><br><br>
 
-    <button type="submit">Guardar</button>
+    <label for="rol">Rol:</label><br>
+    <select name="rol" id="rol" class="form-control">
+        <option value="Administrador">Administrador</option>
+        <option value="Empleado">Empleado</option>
+    </select><br><br>
 
-    <div class="form-group">
-        <label for="rol">Rol</label>
-        <select name="rol" id="rol" class="form-control">
-            <option value="Administrador">Administrador</option>
-            <option value="Empleado">Empleado</option>
-        </select>
-    </div>
-    
+    <button type="submit">Guardar</button>
 </form>
 
 <a href="{% url 'lista_empleados' %}">Volver a la lista</a>

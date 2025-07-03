@@ -4,18 +4,52 @@
 {% block title %}Agregar Cliente{% endblock %}
 
 {% block content %}
-<title>Agregar Cliente</title>
+
+
 <h2>Agregar Cliente</h2>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <label>Nombre:</label><br>
     <input type="text" name="nombre" required><br><br>
+
     <label>Email:</label><br>
     <input type="email" name="email" required><br><br>
-    <label>Teléfono:</label><br>
-    <input type="text" name="telefono"><br><br>
+
+    <label>Teléfono 1:</label><br>
+    <input type="text" name="telefono1" required><br><br>
+
+    <label>Teléfono 2:</label><br>
+    <input type="text" name="telefono2"><br><br>
+
     <label>Dirección:</label><br>
     <input type="text" name="direccion"><br><br>
+
+    <label>Colonia:</label><br>
+    <input type="text" name="colonia"><br><br>
+
+    <label>Ciudad:</label><br>
+    <input type="text" name="ciudad"><br><br>
+
+    <label>RFC:</label><br>
+    <input type="text" name="rfc"><br><br>
+
+    <label>Razón social:</label><br>
+    <input type="text" name="razon_social"><br><br>
+
+    <label>Obra:</label><br>
+    <textarea name="obra"></textarea><br><br>
+
+    <label>Atendió reporte:</label><br>
+    <select name="atendio_reporte">
+        <option value="">---------</option>
+        {% for empleado in empleados %}
+            <option value="{{ empleado.id }}">{{ empleado.nombre }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>CFDI:</label><br>
+    <input type="file" name="cfdi"><br><br>
+
     <button type="submit">Guardar</button>
 </form>
 <a href="{% url 'lista_clientes' %}">Volver a la lista</a>

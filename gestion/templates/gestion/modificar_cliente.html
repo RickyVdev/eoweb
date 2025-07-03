@@ -3,23 +3,52 @@
 
 {% block title %}Modificar Cliente{% endblock %}
 
-{% block content %}
-
-<title>Modificar Cliente</title>
+{% block content %} 
 <h2>Modificar Cliente</h2>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <label>Nombre:</label><br>
     <input type="text" name="nombre" value="{{ cliente.nombre }}" required><br><br>
+
     <label>Email:</label><br>
     <input type="email" name="email" value="{{ cliente.email }}" required><br><br>
-    <label>Teléfono:</label><br>
-    <input type="text" name="telefono" value="{{ cliente.telefono }}"><br><br>
+
+    <label>Teléfono 1:</label><br>
+    <input type="text" name="telefono1" value="{{ cliente.telefono1 }}"><br><br>
+
+    <label>Teléfono 2:</label><br>
+    <input type="text" name="telefono2" value="{{ cliente.telefono2 }}"><br><br>
+
     <label>Dirección:</label><br>
     <input type="text" name="direccion" value="{{ cliente.direccion }}"><br><br>
+
+    <label>Colonia:</label><br>
+    <input type="text" name="colonia" value="{{ cliente.colonia }}"><br><br>
+
+    <label>Ciudad:</label><br>
+    <input type="text" name="ciudad" value="{{ cliente.ciudad }}"><br><br>
+
+    <label>RFC:</label><br>
+    <input type="text" name="rfc" value="{{ cliente.rfc }}"><br><br>
+
+    <label>Razón Social:</label><br>
+    <input type="text" name="razon_social" value="{{ cliente.razon_social }}"><br><br>
+
+    <label>Obra:</label><br>
+    <textarea name="obra">{{ cliente.obra }}</textarea><br><br>
+
+    <label>Atendió reporte:</label><br>
+    <select name="atendio_reporte">
+        <option value="">---------</option>
+        {% for empleado in empleados %}
+            <option value="{{ empleado.id }}" {% if cliente.atendio_reporte and empleado.id == cliente.atendio_reporte.id %}selected{% endif %}>{{ empleado.nombre }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>CFDI:</label><br>
+    <input type="file" name="cfdi"><br><br>
+
     <button type="submit">Guardar cambios</button>
 </form>
-<a href="{% url 'lista_clientes' %}">Volver a la lista</a>
-
-
+<a href="{% url 'lista_clientes' %}">Volver a la lista</a> 
 {% endblock %}

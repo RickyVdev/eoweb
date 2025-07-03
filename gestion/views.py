@@ -12,8 +12,10 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
-from .models import Cliente, Empleado
-
+from .models import Cliente, Empleado, EmpleadoDocumento
+from django.db.models import Q
+from django.http import HttpResponseForbidden  # para validación de permisos
+import os
 
 # Create your views here.
 def login_view(request):
@@ -53,19 +55,36 @@ def crear_grupos():
 
 @login_required
 def lista_clientes(request):
-    clientes = Cliente.objects.all()
+    query = request.GET.get('busqueda', '')
+    if query:
+        clientes = Cliente.objects.filter(
+            Q(nombre__icontains=query) |
+            Q(id__iexact=query)
+        )
+    else:
+        clientes = Cliente.objects.all()
     return render(request, 'gestion/lista_clientes.html', {'clientes': clientes})
 
 @login_required
 def agregar_cliente(request):
+    empleados = Empleado.objects.all()
     if request.method == "POST":
-        nombre = request.POST.get('nombre')
-        email = request.POST.get('email')
-        telefono = request.POST.get('telefono')
-        direccion = request.POST.get('direccion')
-        Cliente.objects.create(nombre=nombre, email=email, telefono=telefono, direccion=direccion)
+        Cliente.objects.create(
+            nombre=request.POST.get('nombre'),
+            email=request.POST.get('email'),
+            telefono1=request.POST.get('telefono1'),
+            telefono2=request.POST.get('telefono2'),
+            direccion=request.POST.get('direccion'),
+            colonia=request.POST.get('colonia'),
+            ciudad=request.POST.get('ciudad'),
+            rfc=request.POST.get('rfc'),
+            razon_social = request.POST.get('razon_social'),
+            obra=request.POST.get('obra'),
+            atendio_reporte_id=request.POST.get('atendio_reporte') or None,
+            cfdi=request.FILES.get('cfdi')
+        )
         return redirect('lista_clientes')
-    return render(request, 'gestion/agregar_cliente.html')
+    return render(request, 'gestion/agregar_cliente.html', {'empleados': empleados})
 
 @login_required
 def modificar_cliente(request, cliente_id):
@@ -73,16 +92,52 @@ def modificar_cliente(request, cliente_id):
         return redirect('lista_clientes')
 
     cliente = get_object_or_404(Cliente, pk=cliente_id)
+    empleados = Empleado.objects.all()
 
     if request.method == "POST":
         cliente.nombre = request.POST.get('nombre')
         cliente.email = request.POST.get('email')
-        cliente.telefono = request.POST.get('telefono')
+        cliente.telefono1 = request.POST.get('telefono1')
+        cliente.telefono2 = request.POST.get('telefono2')
         cliente.direccion = request.POST.get('direccion')
+        cliente.colonia = request.POST.get('colonia')
+        cliente.ciudad = request.POST.get('ciudad')
+        cliente.rfc = request.POST.get('rfc')
+        cliente.razon_social = request.POST.get('razon_social')
+        cliente.obra = request.POST.get('obra')
+        empleado_id = request.POST.get('atendio_reporte')
+        cliente.atendio_reporte = Empleado.objects.get(id=empleado_id) if empleado_id else None
+        
+        nuevo_cfdi = request.FILES.get('cfdi')
+        if nuevo_cfdi:
+            if cliente.cfdi and cliente.cfdi.path and os.path.isfile(cliente.cfdi.path):
+                os.remove(cliente.cfdi.path)
+            cliente.cfdi = nuevo_cfdi
+            
         cliente.save()
         return redirect('lista_clientes')
+
+    return render(request, 'gestion/modificar_cliente.html', {
+        'cliente': cliente,
+        'empleados': empleados
+    })
+
+
+@login_required
+def ver_cliente(request, cliente_id):
     
-    return render(request, 'gestion/modificar_cliente.html', {'cliente': cliente})
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    return render(request, 'gestion/ver_cliente.html', {'cliente': cliente})
+
+@login_required
+def eliminar_cfdi_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    if cliente.cfdi:
+        cliente.cfdi.delete()
+        cliente.cfdi = None
+        cliente.save()
+        messages.success(request, "CFDI eliminado correctamente.")
+    return redirect('ver_cliente', cliente_id=cliente_id)
 
 @login_required
 def eliminar_cliente(request, cliente_id):
@@ -103,16 +158,29 @@ def eliminar_cliente(request, cliente_id):
 def lista_empleados(request):
     if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
         return redirect('lista_empleados')
-    empleados = Empleado.objects.all()
-    sin_usuario = empleados.filter(usuario__isnull=True).count()
 
-    if sin_usuario > 0:
+    empleados = Empleado.objects.all()
+    query = request.GET.get('busqueda', '')
+    rol = request.GET.get('rol', '')
+
+    if query:
+        empleados = empleados.filter(nombre__icontains=query)
+
+    if rol:
+        empleados = empleados.filter(usuario__groups__name=rol)
+
+    sin_usuario = empleados.filter(usuario__isnull=True).count()
+    if sin_usuario > 0: 
         messages.warning(request, f"{sin_usuario} empleado(s) no tienen usuario asociado.")
-    return render(request, 'gestion/lista_empleados.html', {'empleados': empleados})
+
+    return render(request, 'gestion/lista_empleados.html', {
+        'empleados': empleados
+    })
 
 def agregar_empleado(request):
     if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
         return redirect('lista_empleados')
+    
     if request.method == "POST":
         nombre = request.POST.get("nombre")
         email = request.POST.get("email")
@@ -121,6 +189,13 @@ def agregar_empleado(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
         rol = request.POST.get("rol")  # 'Administrador' o 'Empleado'
+
+        # NUEVOS CAMPOS
+        domicilio = request.POST.get("domicilio")
+        codigo_postal = request.POST.get("codigo_postal")
+        rfc = request.POST.get("rfc")
+        fecha_nacimiento = request.POST.get("fecha_nacimiento")
+        tipo_sangre = request.POST.get("tipo_sangre")
 
         if not email:
             messages.error(request, "El correo electrónico es obligatorio.")
@@ -152,13 +227,19 @@ def agregar_empleado(request):
             email=email,
             telefono=telefono,
             cargo=cargo,
-            usuario=user
+            usuario=user,
+            domicilio=domicilio,
+            codigo_postal=codigo_postal,
+            rfc=rfc,
+            fecha_nacimiento=fecha_nacimiento,
+            tipo_sangre=tipo_sangre
         )
 
         messages.success(request, "Empleado agregado correctamente.")
         return redirect('lista_empleados')
 
     return render(request, 'gestion/agregar_empleado.html')
+
 
 @login_required
 def modificar_empleado(request, empleado_id):
@@ -167,7 +248,7 @@ def modificar_empleado(request, empleado_id):
     # Solo superusuario o Administrador pueden editar
     if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
         return redirect('lista_empleados')
-    
+
     # Comprobación dentro del POST también
     if request.method == "POST":
 
@@ -177,18 +258,29 @@ def modificar_empleado(request, empleado_id):
                 messages.error(request, "No tienes permiso para modificar a otro administrador.")
                 return redirect('lista_empleados')
 
-    #if request.method == "POST":
+        # CAMPOS ACTUALES
+        #if request.method == "POST":
         empleado.nombre = request.POST.get("nombre")
         empleado.email = request.POST.get("email")
         empleado.telefono = request.POST.get("telefono")
         empleado.cargo = request.POST.get("cargo")
-        nuevo_rol = request.POST.get("rol")  # 'Administrador' o 'Empleado'
+
 
         # Evitar que un administrador pueda poner a otro como 'Administrador'
         #if nuevo_rol == "Administrador" and not request.user.is_superuser:
         #    messages.error(request, "Solo el superusuario puede asignar el rol de Administrador.")
         #    return redirect('modificar_empleado', empleado_id=empleado.id)
 
+        # NUEVOS CAMPOS
+        empleado.domicilio = request.POST.get("domicilio")
+        empleado.codigo_postal = request.POST.get("codigo_postal")
+        empleado.rfc = request.POST.get("rfc")
+        empleado.fecha_nacimiento = request.POST.get("fecha_nacimiento")
+        empleado.tipo_sangre = request.POST.get("tipo_sangre")
+        
+
+        # ROL
+        nuevo_rol = request.POST.get("rol")
         # Actualiza grupos
         empleado.usuario.groups.clear()
         try:
@@ -197,7 +289,7 @@ def modificar_empleado(request, empleado_id):
         except Group.DoesNotExist:
             messages.error(request, f"El grupo '{nuevo_rol}' no existe.")
             return redirect('modificar_empleado', empleado_id=empleado.id)
-
+    
         empleado.save()
         messages.success(request, "Empleado modificado correctamente.")
         return redirect('lista_empleados')
@@ -209,6 +301,43 @@ def modificar_empleado(request, empleado_id):
         'empleado_grupo': grupos_usuario
     })
 
+@login_required
+def ver_empleado(request, empleado_id):
+    if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
+        return redirect('lista_empleados')
+    
+    empleado = get_object_or_404(Empleado, id=empleado_id)
+    documentos = empleado.documentos.all()
+    return render(request, 'gestion/ver_empleado.html', {
+        'empleado': empleado,
+        'documentos': documentos
+    })
+
+@login_required
+def subir_documento_empleado(request, empleado_id):
+    empleado = get_object_or_404(Empleado, id=empleado_id)
+
+    if request.method == "POST" and request.FILES.get('archivo'):
+        EmpleadoDocumento.objects.create(
+            empleado=empleado,
+            archivo=request.FILES['archivo'],
+            descripcion=request.POST.get('descripcion', '')
+        )
+        messages.success(request, "Documento subido correctamente.")
+    return redirect('ver_empleado', empleado_id=empleado.id)
+
+@login_required
+def eliminar_documento_empleado(request, documento_id):
+    documento = get_object_or_404(EmpleadoDocumento, id=documento_id)
+
+    # Validar que solo admins o superusuarios puedan borrar
+    if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
+        return HttpResponseForbidden("No tienes permiso para eliminar este documento.")
+
+    empleado_id = documento.empleado.id
+    documento.delete()
+    messages.success(request, "Documento eliminado correctamente.")
+    return redirect('ver_empleado', empleado_id=empleado_id)
 
 @login_required
 def eliminar_empleado(request, empleado_id):

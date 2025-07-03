@@ -26,12 +26,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #SECRET_KEY = 'django-insecure-87xg=-(97$mhs@%z8q&o-r&g=y2sl0_&k==^edb#*m^f-@^2^3'
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+#DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
+DEBUG = True
 
 ALLOWED_HOSTS = ['eoweb.up.railway.app', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = []
+
 
 CSRF_TRUSTED_ORIGINS = [
     'https://eoweb.up.railway.app',
@@ -164,3 +166,6 @@ else:
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = config('EMAIL_USER')
     EMAIL_HOST_PASSWORD = config('EMAIL_PASSWORD')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

@@ -1,0 +1,82 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Detalles del Empleado{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg rounded">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">👤 Detalles del Empleado</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">Nombre:</dt>
+                <dd class="col-sm-8">{{ empleado.nombre }}</dd>
+
+                <dt class="col-sm-4">Email:</dt>
+                <dd class="col-sm-8">{{ empleado.email }}</dd>
+
+                <dt class="col-sm-4">Teléfono:</dt>
+                <dd class="col-sm-8">{{ empleado.telefono }}</dd>
+
+                <dt class="col-sm-4">Cargo:</dt>
+                <dd class="col-sm-8">{{ empleado.cargo }}</dd>
+
+                <dt class="col-sm-4">Domicilio:</dt>
+                <dd class="col-sm-8">{{ empleado.domicilio }}</dd>
+
+                <dt class="col-sm-4">Código Postal:</dt>
+                <dd class="col-sm-8">{{ empleado.codigo_postal }}</dd>
+
+                <dt class="col-sm-4">RFC:</dt>
+                <dd class="col-sm-8">{{ empleado.rfc }}</dd>
+
+                <dt class="col-sm-4">Fecha de nacimiento:</dt>
+                <dd class="col-sm-8">{{ empleado.fecha_nacimiento }}</dd>
+
+                <dt class="col-sm-4">Tipo de sangre:</dt>
+                <dd class="col-sm-8">{{ empleado.tipo_sangre }}</dd>
+            </dl>
+
+            <hr>
+            <h5>📎 Documentos Adjuntos</h5>
+            {% if documentos %}
+                <ul class="list-group mb-3">
+                    {% for doc in documentos %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ doc.descripcion|default:doc.archivo.name }}</span>
+                            <div>
+                                <a href="{{ doc.archivo.url }}" target="_blank" class="btn btn-sm btn-outline-success">📄 Ver</a>
+                                <form action="{% url 'eliminar_documento_empleado' doc.id %}" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este documento?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Eliminar</button>
+                                </form>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No hay documentos adjuntos.</p>
+            {% endif %}
+
+
+            <form method="post" enctype="multipart/form-data" action="{% url 'subir_documento_empleado' empleado.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="archivo" class="form-label">Subir nuevo documento:</label>
+                    <input type="file" name="archivo" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="descripcion" class="form-label">Descripción (opcional):</label>
+                    <input type="text" name="descripcion" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary">Subir documento</button>
+            </form>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{% url 'lista_empleados' %}" class="btn btn-secondary">⬅ Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

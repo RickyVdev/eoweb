@@ -1,0 +1,70 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Detalle del Cliente{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg rounded">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">📋 Detalle del Cliente</h3>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-4">Nombre:</dt>
+                <dd class="col-sm-8">{{ cliente.nombre }}</dd>
+
+                <dt class="col-sm-4">Email:</dt>
+                <dd class="col-sm-8">{{ cliente.email }}</dd>
+
+                <dt class="col-sm-4">Teléfono 1:</dt>
+                <dd class="col-sm-8">{{ cliente.telefono1 }}</dd>
+
+                <dt class="col-sm-4">Teléfono 2:</dt>
+                <dd class="col-sm-8">{{ cliente.telefono2 }}</dd>
+
+                <dt class="col-sm-4">Dirección:</dt>
+                <dd class="col-sm-8">{{ cliente.direccion }}</dd>
+
+                <dt class="col-sm-4">Colonia:</dt>
+                <dd class="col-sm-8">{{ cliente.colonia }}</dd>
+
+                <dt class="col-sm-4">Ciudad:</dt>
+                <dd class="col-sm-8">{{ cliente.ciudad }}</dd>
+
+                <dt class="col-sm-4">RFC:</dt>
+                <dd class="col-sm-8">{{ cliente.rfc }}</dd>
+
+                <dt class="col-sm-4">Razón Social:</dt>
+                <dd class="col-sm-8">{{ cliente.razon_social }}</dd>
+
+                <dt class="col-sm-4">Obra:</dt>
+                <dd class="col-sm-8">{{ cliente.obra }}</dd>
+
+                <dt class="col-sm-4">Atendió reporte:</dt>
+                <dd class="col-sm-8">{{ cliente.atendio_reporte }}</dd>
+
+                <dt class="col-sm-4">CFDI:</dt>
+                <dd class="col-sm-8">
+                    {% if cliente.cfdi %}
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="{{ cliente.cfdi.url }}" target="_blank" class="btn btn-success btn-sm">
+                                📄 Ver CFDI
+                            </a>
+                            <form action="{% url 'eliminar_cfdi_cliente' cliente.id %}" method="post" onsubmit="return confirm('¿Eliminar CFDI?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">🗑️ Eliminar</button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <p>No se agregó ningún CFDI.</p>
+                    {% endif %}
+                </dd>
+            </dl>
+        </div>
+        <div class="card-footer text-end">
+            <a href="{% url 'lista_clientes' %}" class="btn btn-secondary">⬅ Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

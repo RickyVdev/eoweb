@@ -32,7 +32,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
 DEBUG = True
 
 ALLOWED_HOSTS = ['eoweb.up.railway.app', 'localhost', '127.0.0.1']
-ALLOWED_HOSTS = []
+#ALLOWED_HOSTS = []
 
 
 CSRF_TRUSTED_ORIGINS = [

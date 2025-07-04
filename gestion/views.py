@@ -255,8 +255,9 @@ def modificar_empleado(request, empleado_id):
         # Si el usuario es un Administrador (no superusuario), NO puede modificar a otros administradores
         if request.user.groups.filter(name='Administrador').exists() and not request.user.is_superuser:
             if empleado.usuario.groups.filter(name='Administrador').exists():
-                messages.error(request, "No tienes permiso para modificar a otro administrador.")
-                return redirect('lista_empleados')
+                if empleado.usuario != request.user:
+                    messages.error(request, "No tienes permiso para modificar a otro administrador.")
+                    return redirect('lista_empleados')
 
         # CAMPOS ACTUALES
         #if request.method == "POST":

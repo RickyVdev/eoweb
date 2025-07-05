@@ -130,10 +130,12 @@
                     {% endif %}
                     </td>
                     <td>
-                        {% if request.user.is_superuser or empleado.usuario.groups.all.0.name != 'Administrador' %}
+                        {% if request.user.is_superuser or empleado.usuario == request.user or empleado.usuario.groups.all.0.name != 'Administrador' %}
                             <a href="{% url 'modificar_empleado' empleado.id %}" class="btn btn-sm btn-warning me-2">
                                 <i class="bi bi-pencil"></i> Editar
                             </a>
+                        {% endif %}
+                        {% if request.user.is_superuser or empleado.usuario.groups.all.0.name != 'Administrador' %}
                             <a href="{% url 'eliminar_empleado' empleado.id %}" class="btn btn-sm btn-danger">
                                 <i class="bi bi-trash"></i> Eliminar
                             </a>

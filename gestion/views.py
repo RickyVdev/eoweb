@@ -283,7 +283,19 @@ def modificar_empleado(request, empleado_id):
 
         # ROL
         nuevo_rol = request.POST.get("rol")
-        # Actualiza grupos
+
+        # Si es administrador editándose a sí mismo, NO puede cambiar su propio rol
+        if (
+            empleado.usuario == request.user and 
+            request.user.groups.filter(name='Administrador').exists() and 
+            not request.user.is_superuser
+        ):
+            grupos_actuales = list(empleado.usuario.groups.values_list('name', flat=True))
+            if nuevo_rol not in grupos_actuales:
+                messages.error(request, "No puedes cambiar tu propio rol.")
+                return redirect('modificar_empleado', empleado_id=empleado.id)
+
+        # Si pasa la validación, actualizamos el grupo
         empleado.usuario.groups.clear()
         try:
             grupo = Group.objects.get(name=nuevo_rol)
@@ -291,6 +303,7 @@ def modificar_empleado(request, empleado_id):
         except Group.DoesNotExist:
             messages.error(request, f"El grupo '{nuevo_rol}' no existe.")
             return redirect('modificar_empleado', empleado_id=empleado.id)
+
     
         empleado.save()
         messages.success(request, "Empleado modificado correctamente.")

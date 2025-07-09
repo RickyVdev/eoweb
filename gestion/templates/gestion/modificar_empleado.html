@@ -27,8 +27,16 @@
       <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}">
     </div>
     <div class="col-md-6">
-      <label>Puesto</label>
-      <input type="text" name="cargo" class="form-control" value="{{ empleado.cargo }}">
+      <label for="cargo">Puesto</label>
+      <div class="input-group">
+        <select id="puesto" name="puesto" class="form-select">
+          {% for p in puestos %}
+            <option value="{{ p.id }}">{{ p.nombre }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" id="nuevo-cargo" class="form-control" placeholder="Otro...">
+        <button type="button" class="btn btn-outline-secondary" onclick="agregarCargo()">Agregar</button>
+      </div>
     </div>
 
     <div class="section-header">📍 Información adicional</div>

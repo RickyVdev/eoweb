@@ -4,50 +4,74 @@
 {% block title %}Modificar Empleado{% endblock %}
 
 {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Modificar Empleado</h2>
 
-
-<h2>Modificar Empleado</h2>
-<form method="post">
+  <form method="post" class="row g-3">
     {% csrf_token %}
 
-    <label>Nombre:</label><br>
-    <input type="text" name="nombre" value="{{ empleado.nombre }}" required><br><br>
+    <div class="col-md-6">
+      <label>ID Personal </label>
+      <input type="text" name="id_personal" class="form-control" value="{{ empleado.id_personal }}" required>
+    </div>
+    <div class="col-md-6">
+      <label>Nombre</label>
+      <input type="text" name="nombre" class="form-control" value="{{ empleado.nombre }}" required>
+    </div>
+    <div class="col-md-6">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" value="{{ empleado.email }}" required>
+    </div>
+    <div class="col-md-6">
+      <label>Teléfono</label>
+      <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}">
+    </div>
+    <div class="col-md-6">
+      <label>Puesto</label>
+      <input type="text" name="cargo" class="form-control" value="{{ empleado.cargo }}">
+    </div>
 
-    <label>Email:</label><br>
-    <input type="email" name="email" value="{{ empleado.email }}" required><br><br>
+    <div class="section-header">📍 Información adicional</div>
 
-    <label>Teléfono:</label><br>
-    <input type="text" name="telefono" value="{{ empleado.telefono }}"><br><br>
+    <div class="col-md-6">
+      <label>Domicilio</label>
+      <input type="text" name="domicilio" class="form-control" value="{{ empleado.domicilio }}">
+    </div>
+    <div class="col-md-6">
+      <label>Código Postal</label>
+      <input type="text" name="codigo_postal" class="form-control" value="{{ empleado.codigo_postal }}">
+    </div>
+    <div class="col-md-6">
+      <label>RFC</label>
+      <input type="text" name="rfc" class="form-control" value="{{ empleado.rfc }}">
+    </div>
+    <div class="col-md-6">
+      <label>Fecha de Nacimiento</label>
+      <input type="date" name="fecha_nacimiento" class="form-control" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}">
+    </div>
+    <div class="col-md-6">
+      <label>Tipo de Sangre</label>
+      <input type="text" name="tipo_sangre" class="form-control" value="{{ empleado.tipo_sangre }}">
+    </div>
 
-    <label>Cargo:</label><br>
-    <input type="text" name="cargo" value="{{ empleado.cargo }}"><br><br>
+    <div class="section-header">🔐 Usuario del sistema</div>
 
-    <!-- Nuevos campos -->
-    <label>Domicilio:</label><br>
-    <input type="text" name="domicilio" value="{{ empleado.domicilio }}"><br><br>
-
-    <label>Código Postal:</label><br>
-    <input type="text" name="codigo_postal" value="{{ empleado.codigo_postal }}"><br><br>
-
-    <label>RFC:</label><br>
-    <input type="text" name="rfc" value="{{ empleado.rfc }}"><br><br>
-
-    <label>Fecha de Nacimiento:</label><br>
-    <input type="date" name="fecha_nacimiento" value="{{ empleado.fecha_nacimiento|date:'Y-m-d' }}"><br><br>
-
-    <label>Tipo de Sangre:</label><br>
-    <input type="text" name="tipo_sangre" value="{{ empleado.tipo_sangre }}"><br><br>
-
-    <label for="rol">Rol:</label><br>
-    <select name="rol" id="rol" class="form-control">
+    <div class="col-md-6">
+      <label for="rol">Rol</label>
+      <select name="rol" class="form-select">
         <option value="Administrador" {% if "Administrador" in empleado_grupo %}selected{% endif %}>Administrador</option>
         <option value="Empleado" {% if "Empleado" in empleado_grupo %}selected{% endif %}>Empleado</option>
-    </select><br><br>
+      </select>
+    </div>
 
-    <button type="submit">Guardar cambios</button>
-</form>
-
-<a href="{% url 'lista_empleados' %}">Volver a la lista</a>
-
-
+    <div class="col-12 mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save"></i> Guardar
+        </button>
+        <a href="{% url 'lista_empleados' %}" class="btn btn-danger">
+            <i class="bi bi-x-circle"></i> Cancelar
+        </a>
+    </div>
+  </form>
+</div>
 {% endblock %}

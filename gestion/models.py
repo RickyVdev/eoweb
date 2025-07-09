@@ -4,38 +4,36 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Cliente(models.Model):
-    nombre = models.CharField(max_length=100)
-    email = models.EmailField(unique=True)
-    
-    direccion = models.CharField(max_length=200, blank=True)
-    colonia = models.CharField(max_length=100, blank=True)
-    ciudad = models.CharField(max_length=100, blank=True)
-    rfc = models.CharField(max_length=13, blank=True)
-    razon_social = models.CharField(max_length=200, blank=True)
-    telefono1 = models.CharField(max_length=20, default='0000000000')  # Valor temporal  # Obligatorio
-    telefono2 = models.CharField(max_length=20, blank=True)  # Opcional
-    obra = models.TextField(blank=True)
-    atendio_reporte = models.ForeignKey('Empleado', null=True, blank=True, on_delete=models.SET_NULL)
+    clave = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    nombre = models.CharField("Nombre", max_length=255)
+    direccion = models.CharField("Dirección", max_length=255)
+    colonia = models.CharField("Colonia", max_length=100)
+    ciudad = models.CharField("Ciudad", max_length=100)
+    telefono = models.CharField("Teléfono", max_length=100)
+    atencion_a = models.CharField("Atención a", max_length=255, blank=True)
+    obra = models.CharField("Obra", max_length=150)
+    localizacion = models.CharField("Localización", max_length=150, blank=True)
+    correo = models.EmailField("Correo", blank=True)
 
-    cfdi = models.FileField(upload_to='cfdis/', null=True, blank=True)
-    def delete(self, *args, **kwargs):
-        # Borrar archivo CFDI si existe
-        if self.cfdi and os.path.isfile(self.cfdi.path):
-            os.remove(self.cfdi.path)
-        super().delete(*args, **kwargs)
+    def __str__(self):
+        return f"{self.clave} - {self.nombre}"
+
+class Puesto(models.Model):
+    nombre = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.nombre
 
-
-class Empleado(models.Model):
+class Empleado(models.Model): 
+    id_personal = models.CharField(max_length=20, unique=True, null=True, blank=True)
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     telefono = models.CharField(max_length=20, blank=True)
-    cargo = models.CharField(max_length=50)
+    puesto_antiguo = models.CharField(max_length=100, null=True, blank=True)  # renombrado
+    puesto = models.ForeignKey(Puesto, on_delete=models.SET_NULL, null=True, blank=True)
 
-    # Nuevos campos
+    # Campos adicionales
     domicilio = models.CharField(max_length=255, blank=True, null=True)
     codigo_postal = models.CharField(max_length=10, blank=True, null=True)
     rfc = models.CharField(max_length=13, blank=True, null=True)
@@ -58,3 +56,5 @@ class EmpleadoDocumento(models.Model):
 
     def __str__(self):
         return f"{self.empleado.nombre} - {self.archivo.name}"
+    
+

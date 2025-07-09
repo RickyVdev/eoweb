@@ -12,7 +12,8 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
-from .models import Cliente, Empleado, EmpleadoDocumento
+from .models import Cliente, Empleado, EmpleadoDocumento, Puesto
+from .forms import ClienteForm
 from django.db.models import Q
 from django.http import HttpResponseForbidden  # para validación de permisos
 import os
@@ -67,60 +68,36 @@ def lista_clientes(request):
 
 @login_required
 def agregar_cliente(request):
-    empleados = Empleado.objects.all()
-    if request.method == "POST":
-        Cliente.objects.create(
-            nombre=request.POST.get('nombre'),
-            email=request.POST.get('email'),
-            telefono1=request.POST.get('telefono1'),
-            telefono2=request.POST.get('telefono2'),
-            direccion=request.POST.get('direccion'),
-            colonia=request.POST.get('colonia'),
-            ciudad=request.POST.get('ciudad'),
-            rfc=request.POST.get('rfc'),
-            razon_social = request.POST.get('razon_social'),
-            obra=request.POST.get('obra'),
-            atendio_reporte_id=request.POST.get('atendio_reporte') or None,
-            cfdi=request.FILES.get('cfdi')
-        )
-        return redirect('lista_clientes')
-    return render(request, 'gestion/agregar_cliente.html', {'empleados': empleados})
+    if request.method == "POST": 
+        form = ClienteForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Cliente agregado correctamente.")
+            return redirect('lista_clientes')
+    else:
+        form = ClienteForm()
+    
+    return render(request, 'gestion/agregar_cliente.html', {'form': form})
 
 @login_required
 def modificar_cliente(request, cliente_id):
-    if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
-        return redirect('lista_clientes')
+    cliente = get_object_or_404(Cliente, id=cliente_id)
 
-    cliente = get_object_or_404(Cliente, pk=cliente_id)
-    empleados = Empleado.objects.all()
-
-    if request.method == "POST":
+    if request.method == 'POST':
+        cliente.clave = request.POST.get('clave')
         cliente.nombre = request.POST.get('nombre')
-        cliente.email = request.POST.get('email')
-        cliente.telefono1 = request.POST.get('telefono1')
-        cliente.telefono2 = request.POST.get('telefono2')
-        cliente.direccion = request.POST.get('direccion')
+        cliente.direccion = request.POST.get('direccion') 
         cliente.colonia = request.POST.get('colonia')
         cliente.ciudad = request.POST.get('ciudad')
-        cliente.rfc = request.POST.get('rfc')
-        cliente.razon_social = request.POST.get('razon_social')
+        cliente.telefono = request.POST.get('telefono')
+        cliente.atencion_a = request.POST.get('atencion_a')
         cliente.obra = request.POST.get('obra')
-        empleado_id = request.POST.get('atendio_reporte')
-        cliente.atendio_reporte = Empleado.objects.get(id=empleado_id) if empleado_id else None
-        
-        nuevo_cfdi = request.FILES.get('cfdi')
-        if nuevo_cfdi:
-            if cliente.cfdi and cliente.cfdi.path and os.path.isfile(cliente.cfdi.path):
-                os.remove(cliente.cfdi.path)
-            cliente.cfdi = nuevo_cfdi
-            
+        cliente.localizacion = request.POST.get('localizacion')
+        cliente.correo = request.POST.get('correo')
         cliente.save()
         return redirect('lista_clientes')
 
-    return render(request, 'gestion/modificar_cliente.html', {
-        'cliente': cliente,
-        'empleados': empleados
-    })
+    return render(request, 'gestion/modificar_cliente.html', {'cliente': cliente})
 
 
 @login_required
@@ -164,7 +141,9 @@ def lista_empleados(request):
     rol = request.GET.get('rol', '')
 
     if query:
-        empleados = empleados.filter(nombre__icontains=query)
+        empleados = empleados.filter(
+            Q(nombre__icontains=query) | Q(puesto__icontains=query)
+        )
 
     if rol:
         empleados = empleados.filter(usuario__groups__name=rol)
@@ -177,15 +156,25 @@ def lista_empleados(request):
         'empleados': empleados
     })
 
+@login_required
 def agregar_empleado(request):
     if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
         return redirect('lista_empleados')
     
     if request.method == "POST":
+        id_personal = request.POST.get("id_personal")
         nombre = request.POST.get("nombre")
         email = request.POST.get("email")
         telefono = request.POST.get("telefono")
-        cargo = request.POST.get("cargo")
+        puesto_valor = request.POST.get("puesto")
+
+        # Si es un número, intenta buscar por ID. Si no, busca por nombre o crea uno nuevo.
+        if puesto_valor and puesto_valor.isdigit():
+            puesto = Puesto.objects.filter(id=puesto_valor).first()
+        elif puesto_valor:
+            puesto, _ = Puesto.objects.get_or_create(nombre=puesto_valor)
+        else:
+            puesto = None
         username = request.POST.get("username")
         password = request.POST.get("password")
         rol = request.POST.get("rol")  # 'Administrador' o 'Empleado'
@@ -223,10 +212,11 @@ def agregar_empleado(request):
 
         # Crear el objeto Empleado
         Empleado.objects.create(
+            id_personal=id_personal,
             nombre=nombre,
             email=email,
             telefono=telefono,
-            cargo=cargo,
+            puesto=puesto,
             usuario=user,
             domicilio=domicilio,
             codigo_postal=codigo_postal,
@@ -238,7 +228,8 @@ def agregar_empleado(request):
         messages.success(request, "Empleado agregado correctamente.")
         return redirect('lista_empleados')
 
-    return render(request, 'gestion/agregar_empleado.html')
+    puestos = Puesto.objects.all()
+    return render(request, 'gestion/agregar_empleado.html', {'puestos': puestos})
 
 
 @login_required
@@ -265,7 +256,7 @@ def modificar_empleado(request, empleado_id):
         empleado.nombre = request.POST.get("nombre")
         empleado.email = request.POST.get("email")
         empleado.telefono = request.POST.get("telefono")
-        empleado.cargo = request.POST.get("cargo")
+        empleado.puesto = request.POST.get("puesto")
 
 
         # Evitar que un administrador pueda poner a otro como 'Administrador'

@@ -4,55 +4,116 @@
 {% block title %}Agregar Empleado{% endblock %}
 
 {% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Agregar Empleado</h2>
 
-<h2>Agregar Empleado</h2>
-<form method="post">
+  <form method="post" class="row g-3">
     {% csrf_token %}
 
-    <label>Nombre:</label><br>
-    <input type="text" name="nombre" required><br><br>
+    <div class="col-md-4">
+      <label>ID Personal</label>
+      <input type="text" name="id_personal" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label>Nombre</label>
+      <input type="text" name="nombre" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label>Email</label>
+      <input type="email" name="email" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label>Teléfono</label>
+      <input type="text" name="telefono" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label for="cargo">Puesto</label>
+      <div class="input-group">
+        <select id="puesto" name="puesto" class="form-select">
+          {% for p in puestos %}
+            <option value="{{ p.id }}">{{ p.nombre }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" id="nuevo-cargo" class="form-control" placeholder="Otro...">
+        <button type="button" class="btn btn-outline-secondary" onclick="agregarCargo()">Agregar</button>
+      </div>
+    </div>
 
-    <label>Email:</label><br>
-    <input type="email" name="email" required><br><br>
+    <div class="section-header">📍 Información adicional</div>
 
-    <label>Teléfono:</label><br>
-    <input type="text" name="telefono"><br><br>
+    <div class="col-md-6">
+      <label>Domicilio</label>
+      <input type="text" name="domicilio" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label>Código Postal</label>
+      <input type="text" name="codigo_postal" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label>RFC</label>
+      <input type="text" name="rfc" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label>Fecha de Nacimiento</label>
+      <input type="date" name="fecha_nacimiento" class="form-control">
+    </div>
+    <div class="col-md-6">
+      <label>Tipo de Sangre</label>
+      <input type="text" name="tipo_sangre" class="form-control">
+    </div>
 
-    <label>Cargo:</label><br>
-    <input type="text" name="cargo"><br><br>
+    <div class="section-header">🔐 Usuario del sistema</div>
 
-    <!-- Nuevos campos -->
-    <label>Domicilio:</label><br>
-    <input type="text" name="domicilio"><br><br>
-
-    <label>Código Postal:</label><br>
-    <input type="text" name="codigo_postal"><br><br>
-
-    <label>RFC:</label><br>
-    <input type="text" name="rfc"><br><br>
-
-    <label>Fecha de Nacimiento:</label><br>
-    <input type="date" name="fecha_nacimiento"><br><br> 
-
-    <label>Tipo de Sangre:</label><br>
-    <input type="text" name="tipo_sangre"><br><br>
-
-    <!-- Datos de usuario -->
-    <label>Nombre de usuario:</label><br>
-    <input type="text" name="username" required><br><br>
-
-    <label>Contraseña:</label><br>
-    <input type="password" name="password" required><br><br>
-
-    <label for="rol">Rol:</label><br>
-    <select name="rol" id="rol" class="form-control">
+    <div class="col-md-6">
+      <label>Nombre de usuario</label>
+      <input type="text" name="username" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label>Contraseña</label>
+      <input type="password" name="password" class="form-control" required>
+    </div>
+    <div class="col-md-6">
+      <label for="rol">Rol</label>
+      <select name="rol" class="form-select">
         <option value="Administrador">Administrador</option>
         <option value="Empleado">Empleado</option>
-    </select><br><br>
+      </select>
+    </div>
 
-    <button type="submit">Guardar</button>
-</form>
+    <div class="col-12 mt-4">
+    <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save"></i> Guardar
+    </button>
+    <a href="{% url 'lista_empleados' %}" class="btn btn-danger">
+        <i class="bi bi-x-circle"></i> Cancelar
+    </a>
+</div>
+  </form>
+</div>
 
-<a href="{% url 'lista_empleados' %}">Volver a la lista</a>
+<script>
+function agregarCargo() {
+    const nuevoCargoInput = document.getElementById("nuevo-cargo");
+    const selectPuesto = document.getElementById("puesto");
+    const nuevoCargo = nuevoCargoInput.value.trim();
+
+    if (nuevoCargo) {
+        // Crear nueva opción
+        const nuevaOpcion = document.createElement("option");
+        nuevaOpcion.value = nuevoCargo;  // esto es el texto que se enviará en el POST
+        nuevaOpcion.text = nuevoCargo;
+        nuevaOpcion.selected = true;  // seleccionar automáticamente
+
+        // Agregar al <select>
+        selectPuesto.appendChild(nuevaOpcion);
+
+        // Limpiar el input
+        nuevoCargoInput.value = "";
+    } else {
+        alert("Escribe un nombre de puesto antes de agregar.");
+    }
+}
+</script>
+
 
 {% endblock %}

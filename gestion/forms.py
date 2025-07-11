@@ -15,8 +15,10 @@ class ClienteForm(forms.ModelForm):
         model = Cliente
         fields = [
             'clave', 'nombre', 'direccion', 'colonia', 'ciudad',
-            'telefono', 'atencion_a', 'obra', 'localizacion', 'correo'
+            'telefono', 'atencion_a','correo'
         ]    
+
+        #'obra', 'localizacion', 
         labels = {
             'clave': 'Clave del Cliente',
             'nombre': 'Nombre o Razón Social',
@@ -25,8 +27,8 @@ class ClienteForm(forms.ModelForm):
             'ciudad': 'Ciudad',
             'telefono': 'Teléfono',
             'atencion_a': 'Atención a',
-            'obra': 'Nombre de la Obra o Proyecto',
-            'localizacion': 'Localización',
+            #'obra': 'Nombre de la Obra o Proyecto',
+            #'localizacion': 'Localización',
             'correo': 'Correo Electrónico',
         }
         widgets = {
@@ -37,8 +39,8 @@ class ClienteForm(forms.ModelForm):
             'ciudad': forms.TextInput(attrs={'class': 'form-control'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control'}),
             'atencion_a': forms.TextInput(attrs={'class': 'form-control'}),
-            'obra': forms.TextInput(attrs={'class': 'form-control'}),
-            'localizacion': forms.TextInput(attrs={'class': 'form-control'}),
+            #'obra': forms.TextInput(attrs={'class': 'form-control'}),
+            #'localizacion': forms.TextInput(attrs={'class': 'form-control'}),
             'correo': forms.EmailInput(attrs={'class': 'form-control'}),
         }
     

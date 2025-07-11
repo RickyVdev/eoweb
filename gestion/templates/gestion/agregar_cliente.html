@@ -28,12 +28,13 @@
         <div class="col-md-6">
             {{ form.atencion_a.label_tag }} {{ form.atencion_a }}
         </div>
+        <!--
         <div class="col-md-6">
             {{ form.obra.label_tag }} {{ form.obra }}
         </div>
         <div class="col-md-6">
             {{ form.localizacion.label_tag }} {{ form.localizacion }}
-        </div>
+        </div>-->
         <div class="col-md-6">
             {{ form.correo.label_tag }} {{ form.correo }}
         </div>
@@ -64,5 +65,15 @@
     </div>
 {% endif %}
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+  const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+  });
+});
+</script>
 
 {% endblock %}

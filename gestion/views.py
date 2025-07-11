@@ -139,14 +139,18 @@ def lista_empleados(request):
     empleados = Empleado.objects.all()
     query = request.GET.get('busqueda', '')
     rol = request.GET.get('rol', '')
+    fecha_nacimiento = request.POST.get("fecha_nacimiento")
+    
 
     if query:
         empleados = empleados.filter(
-            Q(nombre__icontains=query) | Q(puesto__icontains=query)
+            Q(nombre__icontains=query) | Q(puesto__nombre__icontains=query) | Q(id_personal__icontains=query)
         )
 
     if rol:
         empleados = empleados.filter(usuario__groups__name=rol)
+    
+   
 
     sin_usuario = empleados.filter(usuario__isnull=True).count()
     if sin_usuario > 0: 
@@ -156,17 +160,18 @@ def lista_empleados(request):
         'empleados': empleados
     })
 
+
 @login_required
 def agregar_empleado(request):
     if not request.user.is_superuser and not request.user.groups.filter(name='Administrador').exists():
         return redirect('lista_empleados')
     
     if request.method == "POST":
-        id_personal = request.POST.get("id_personal")
-        nombre = request.POST.get("nombre")
-        email = request.POST.get("email")
-        telefono = request.POST.get("telefono")
-        puesto_valor = request.POST.get("puesto")
+        id_personal = request.POST.get("id_personal", "").upper()
+        nombre = request.POST.get("nombre", "").upper()
+        email = request.POST.get("email", "").upper()
+        telefono = request.POST.get("telefono", "").upper()
+        puesto_valor = request.POST.get("puesto", "").upper()
 
         # Si es un número, intenta buscar por ID. Si no, busca por nombre o crea uno nuevo.
         if puesto_valor and puesto_valor.isdigit():
@@ -180,14 +185,22 @@ def agregar_empleado(request):
         rol = request.POST.get("rol")  # 'Administrador' o 'Empleado'
 
         # NUEVOS CAMPOS
-        domicilio = request.POST.get("domicilio")
-        codigo_postal = request.POST.get("codigo_postal")
-        rfc = request.POST.get("rfc")
-        fecha_nacimiento = request.POST.get("fecha_nacimiento")
-        tipo_sangre = request.POST.get("tipo_sangre")
+        domicilio = request.POST.get("domicilio", "").upper()
+        codigo_postal = request.POST.get("codigo_postal", "").upper()
+        rfc = request.POST.get("rfc", "").upper()
+        fecha_nacimiento = request.POST.get("fecha_nacimiento", "").upper()
+        tipo_sangre = request.POST.get("tipo_sangre", "").upper()
 
         if not email:
             messages.error(request, "El correo electrónico es obligatorio.")
+            return redirect('agregar_empleado')
+        
+        if not fecha_nacimiento:
+            messages.error(request, "La fecha de nacimiento es obligatoria.")
+            return redirect('agregar_empleado')
+        
+        if not telefono.isdigit():
+            messages.error(request, "El teléfono solo debe contener números.")
             return redirect('agregar_empleado')
 
         if User.objects.filter(username=username).exists():
@@ -255,8 +268,18 @@ def modificar_empleado(request, empleado_id):
         #if request.method == "POST":
         empleado.nombre = request.POST.get("nombre")
         empleado.email = request.POST.get("email")
-        empleado.telefono = request.POST.get("telefono")
-        empleado.puesto = request.POST.get("puesto")
+        telefono = request.POST.get("telefono")
+
+        # ✅ Validación de teléfono (solo dígitos y longitud exacta)
+        if not telefono.isdigit() or len(telefono) != 10:
+            messages.error(request, "El teléfono debe contener exactamente 10 dígitos numéricos.")
+            return redirect('modificar_empleado', empleado_id=empleado.id)
+
+        empleado.telefono = telefono
+        
+        puesto_nombre = request.POST.get("puesto")
+        puesto_obj, _ = Puesto.objects.get_or_create(nombre=puesto_nombre)
+        empleado.puesto = puesto_obj
 
 
         # Evitar que un administrador pueda poner a otro como 'Administrador'
@@ -271,7 +294,6 @@ def modificar_empleado(request, empleado_id):
         empleado.fecha_nacimiento = request.POST.get("fecha_nacimiento")
         empleado.tipo_sangre = request.POST.get("tipo_sangre")
         
-
         # ROL
         nuevo_rol = request.POST.get("rol")
 
@@ -302,9 +324,11 @@ def modificar_empleado(request, empleado_id):
 
     # Para marcar el grupo actual seleccionado
     grupos_usuario = empleado.usuario.groups.values_list('name', flat=True)
+    puestos = Puesto.objects.all()
     return render(request, 'gestion/modificar_empleado.html', {
         'empleado': empleado,
-        'empleado_grupo': grupos_usuario
+        'empleado_grupo': grupos_usuario,
+        'puestos': puestos
     })
 
 @login_required

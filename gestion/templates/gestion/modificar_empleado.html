@@ -24,14 +24,16 @@
     </div>
     <div class="col-md-6">
       <label>Teléfono</label>
-      <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}">
+      <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}" pattern="\d{10}" title="Debe contener 10 dígitos numéricos" required>
     </div>
-    <div class="col-md-6">
-      <label for="cargo">Puesto</label>
+        <div class="col-md-6">
+      <label for="puesto">Puesto</label>
       <div class="input-group">
         <select id="puesto" name="puesto" class="form-select">
           {% for p in puestos %}
-            <option value="{{ p.id }}">{{ p.nombre }}</option>
+            <option value="{{ p.nombre }}" {% if empleado.puesto.nombre == p.nombre %}selected{% endif %}>
+              {{ p.nombre }}
+            </option>
           {% endfor %}
         </select>
         <input type="text" id="nuevo-cargo" class="form-control" placeholder="Otro...">
@@ -82,4 +84,34 @@
     </div>
   </form>
 </div>
+
+<script>
+function agregarCargo() {
+    const nuevoCargoInput = document.getElementById("nuevo-cargo");
+    const selectPuesto = document.getElementById("puesto");
+    const nuevoCargo = nuevoCargoInput.value.trim();
+
+    if (nuevoCargo) {
+        const nuevaOpcion = document.createElement("option");
+        nuevaOpcion.value = nuevoCargo;
+        nuevaOpcion.text = nuevoCargo;
+        nuevaOpcion.selected = true;
+        selectPuesto.appendChild(nuevaOpcion);
+        nuevoCargoInput.value = "";
+    } else {
+        alert("Escribe un nombre de puesto antes de agregar.");
+    }
+}
+
+    document.addEventListener('DOMContentLoaded', function() {
+  const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+  });
+});
+</script>
+
+
 {% endblock %}

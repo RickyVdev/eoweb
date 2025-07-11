@@ -24,7 +24,7 @@
     </div>
     <div class="col-md-6">
       <label>Teléfono</label>
-      <input type="text" name="telefono" class="form-control">
+      <input type="text" name="telefono" class="form-control" required pattern="\d{10}" title="Introduce un número de 10 dígitos">
     </div>
     <div class="col-md-6">
       <label for="cargo">Puesto</label>
@@ -55,7 +55,7 @@
     </div>
     <div class="col-md-6">
       <label>Fecha de Nacimiento</label>
-      <input type="date" name="fecha_nacimiento" class="form-control">
+      <input type="date" name="fecha_nacimiento" class="form-control" required>
     </div>
     <div class="col-md-6">
       <label>Tipo de Sangre</label>
@@ -113,7 +113,18 @@ function agregarCargo() {
         alert("Escribe un nombre de puesto antes de agregar.");
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+  });
+});
 </script>
+
+
 
 
 {% endblock %}

@@ -30,7 +30,7 @@
         </div>
         <div class="col-md-6">
             <label><strong>Teléfono:</strong></label>
-            <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono }}">
+            <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono }}" pattern="\d{10}" title="Debe contener 10 dígitos numéricos" required>
         </div>
         <div class="col-md-6">
             <label><strong>Atención:</strong></label>
@@ -59,4 +59,16 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+  const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      this.value = this.value.toUpperCase();
+    });
+  });
+});
+</script>
+
 {% endblock %}

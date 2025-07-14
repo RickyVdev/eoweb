@@ -266,7 +266,8 @@ def modificar_empleado(request, empleado_id):
 
         # CAMPOS ACTUALES
         #if request.method == "POST":
-        empleado.nombre = request.POST.get("nombre")
+        empleado.nombre = request.POST.get("nombre", "").upper()
+        empleado.id_personal = request.POST.get("id_personal", "").upper()
         empleado.email = request.POST.get("email")
         telefono = request.POST.get("telefono")
 
@@ -277,7 +278,7 @@ def modificar_empleado(request, empleado_id):
 
         empleado.telefono = telefono
         
-        puesto_nombre = request.POST.get("puesto")
+        puesto_nombre = request.POST.get("puesto", "").upper()
         puesto_obj, _ = Puesto.objects.get_or_create(nombre=puesto_nombre)
         empleado.puesto = puesto_obj
 
@@ -288,11 +289,11 @@ def modificar_empleado(request, empleado_id):
         #    return redirect('modificar_empleado', empleado_id=empleado.id)
 
         # NUEVOS CAMPOS
-        empleado.domicilio = request.POST.get("domicilio")
-        empleado.codigo_postal = request.POST.get("codigo_postal")
-        empleado.rfc = request.POST.get("rfc")
-        empleado.fecha_nacimiento = request.POST.get("fecha_nacimiento")
-        empleado.tipo_sangre = request.POST.get("tipo_sangre")
+        empleado.domicilio = request.POST.get("domicilio", "").upper()
+        empleado.codigo_postal = request.POST.get("codigo_postal", "").upper()
+        empleado.rfc = request.POST.get("rfc", "").upper()
+        empleado.fecha_nacimiento = request.POST.get("fecha_nacimiento", "").upper()
+        empleado.tipo_sangre = request.POST.get("tipo_sangre", "").upper()
         
         # ROL
         nuevo_rol = request.POST.get("rol")

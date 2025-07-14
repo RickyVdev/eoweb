@@ -115,11 +115,14 @@ function agregarCargo() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
+  const inputs = document.querySelectorAll('input[type="text"]');
   inputs.forEach(input => {
-    input.addEventListener('input', function() {
-      this.value = this.value.toUpperCase();
-    });
+    const excludeNames = ['email', 'username', 'password'];
+    if (!excludeNames.includes(input.name)) {
+      input.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+      });
+    }
   });
 });
 </script>

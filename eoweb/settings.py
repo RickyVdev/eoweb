@@ -22,16 +22,42 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-#SECRET_KEY = 'django-insecure-87xg=-(97$mhs@%z8q&o-r&g=y2sl0_&k==^edb#*m^f-@^2^3'
+# ======================
+# CONFIGURACIÓN LOCAL
+# ======================
+#SECRET_KEY = '6!dbs_rb*b89tmkb8qpd5oc27i#73pdbu379y-0mr5evoqm4y_'
+#DEBUG = True
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.sqlite3',
+#        'NAME': BASE_DIR / 'db.sqlite3',
+#    }
+#}
 
+
+
+# ======================
+# CONFIGURACIÓN PRODUCCIÓN (RAILWAY)
+# ======================
 SECRET_KEY = os.getenv('SECRET_KEY')
-
 if not SECRET_KEY:
     raise Exception("SECRET_KEY no definida. Agrega una variable de entorno 'SECRET_KEY'.")#DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = False
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+if 'DATABASE_URL' in os.environ:
+    DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'], conn_max_age=600)
+
+
+
+
+
 
 ALLOWED_HOSTS = ['eoweb.up.railway.app', 'localhost', '127.0.0.1']
 #ALLOWED_HOSTS = []
@@ -84,8 +110,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'eoweb.wsgi.application'
-
+WSGI_APPLICATION = 'eoweb.wsgi.application' 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
@@ -95,18 +120,7 @@ WSGI_APPLICATION = 'eoweb.wsgi.application'
 #        default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
 #        conn_max_age=600
 #    )
-#}
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-if 'DATABASE_URL' in os.environ:
-    DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'], conn_max_age=600)
-
+#} 
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

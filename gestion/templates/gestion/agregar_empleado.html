@@ -36,6 +36,7 @@
         </select>
         <input type="text" id="nuevo-cargo" class="form-control" placeholder="Otro...">
         <button type="button" class="btn btn-outline-secondary" onclick="agregarCargo()">Agregar</button>
+        <button type="button" class="btn btn-outline-danger" onclick="eliminarCargo()">Eliminar</button>
       </div>
     </div>
 
@@ -97,22 +98,35 @@ function agregarCargo() {
     const selectPuesto = document.getElementById("puesto");
     const nuevoCargo = nuevoCargoInput.value.trim();
 
-    if (nuevoCargo) {
-        // Crear nueva opción
+    if (nuevoCargo) { 
         const nuevaOpcion = document.createElement("option");
-        nuevaOpcion.value = nuevoCargo;  // esto es el texto que se enviará en el POST
+        nuevaOpcion.value = nuevoCargo;
         nuevaOpcion.text = nuevoCargo;
-        nuevaOpcion.selected = true;  // seleccionar automáticamente
-
-        // Agregar al <select>
+        nuevaOpcion.setAttribute("data-original", "false");  // Marca como dinámico
+        nuevaOpcion.selected = true;
         selectPuesto.appendChild(nuevaOpcion);
-
-        // Limpiar el input
-        nuevoCargoInput.value = "";
+        nuevoCargoInput.value = ""; 
     } else {
         alert("Escribe un nombre de puesto antes de agregar.");
     }
 }
+
+function eliminarCargo() {
+    const selectPuesto = document.getElementById("puesto");
+    const opcionSeleccionada = selectPuesto.options[selectPuesto.selectedIndex];
+
+    if (opcionSeleccionada) {
+        const esDinamico = !opcionSeleccionada.hasAttribute("data-original");
+        if (esDinamico) {
+            selectPuesto.removeChild(opcionSeleccionada);
+        } else {
+            alert("Solo puedes eliminar cargos que hayas agregado manualmente.");
+        }
+    } else {
+        alert("No hay un cargo seleccionado.");
+    }
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
   const inputs = document.querySelectorAll('input[type="text"]');

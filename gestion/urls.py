@@ -33,6 +33,7 @@ urlpatterns = [
     path('empleados/<int:empleado_id>/subir_documento/', views.subir_documento_empleado, name='subir_documento_empleado'),
     path('empleados/documento/<int:documento_id>/eliminar/', views.eliminar_documento_empleado, name='eliminar_documento_empleado'),
     path('clientes/<int:cliente_id>/eliminar_cfdi/', views.eliminar_cfdi_cliente, name='eliminar_cfdi_cliente'),
+    path('ajax/obtener-id-empleado/', views.obtener_id_empleado_ajax, name='obtener_id_empleado_ajax'),
 
 ]
 

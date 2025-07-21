@@ -12,7 +12,7 @@
 
     <div class="col-md-4">
       <label>ID Personal</label>
-      <input type="text" name="id_personal" class="form-control" required>
+      <input type="text" id="id_personal" name="id_personal" value="{{ id_sugerido }}" class="form-control" readonly maxlength="10" style="width: 200px;">
     </div>
     <div class="col-md-6">
       <label>Nombre</label>
@@ -24,7 +24,7 @@
     </div>
     <div class="col-md-6">
       <label>Teléfono</label>
-      <input type="text" name="telefono" class="form-control" required pattern="\d{10}" title="Introduce un número de 10 dígitos">
+      <input type="text" name="telefono" class="form-control" title="Introduce un número de 10 dígitos">
     </div>
     <div class="col-md-6">
       <label for="cargo">Puesto</label>
@@ -63,7 +63,7 @@
       <input type="text" name="tipo_sangre" class="form-control">
     </div>
 
-    <div class="section-header">🔐 Usuario del sistema</div>
+    <div class="section-header">🔐 Acerca del Usuario</div>
 
     <div class="col-md-6">
       <label>Nombre de usuario</label>
@@ -139,6 +139,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const selectPuesto = document.getElementById("puesto");
+    const idPersonalInput = document.getElementById("id_personal");
+
+    selectPuesto.addEventListener("change", function () {
+        const puestoId = this.value;
+
+        if (puestoId) {
+            fetch(`/ajax/obtener-id-empleado/?puesto_id=${puestoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.id_personal) {
+                        idPersonalInput.value = data.id_personal;
+                    } else {
+                        console.error("No se pudo generar el ID:", data);
+                    }
+                })
+                .catch(error => console.error("Error en la solicitud AJAX:", error));
+        }
+    });
+});
+
 </script>
 
 

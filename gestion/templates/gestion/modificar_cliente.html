@@ -1,52 +1,65 @@
 {% extends "gestion/base.html" %}
 {% load static %}
 
+{% block title %}Modificar Cliente{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">Modificar Cliente</h2>
-
     <form method="post" class="row g-3">
         {% csrf_token %}
 
-        <div class="col-md-6">
-            <label><strong>Clave:</strong></label>
-            <input type="text" name="clave" class="form-control" value="{{ cliente.clave }}" required>
+        <div class="col-md-2">
+            {{ form.clave.label_tag }}
+            {{ form.clave }}
+        </div>
+        <div class="col-md-8">
+            {{ form.nombre.label_tag }}
+            {{ form.nombre }}
         </div>
         <div class="col-md-6">
-            <label><strong>Nombre:</strong></label>
-            <input type="text" name="nombre" class="form-control" value="{{ cliente.nombre }}" required>
+            {{ form.calle.label_tag }}
+            {{ form.calle }}
+        </div>
+        <div class="col-md-3">
+            {{ form.numero_exterior.label_tag }}
+            {{ form.numero_exterior }}
+        </div>
+        <div class="col-md-3">
+            {{ form.numero_interior.label_tag }}
+            {{ form.numero_interior }}
         </div>
         <div class="col-md-6">
-            <label><strong>Dirección:</strong></label>
-            <input type="text" name="direccion" class="form-control" value="{{ cliente.direccion }}">
+            {{ form.colonia.label_tag }}
+            {{ form.colonia }}
         </div>
         <div class="col-md-6">
-            <label><strong>Colonia:</strong></label>
-            <input type="text" name="colonia" class="form-control" value="{{ cliente.colonia }}">
+            {{ form.ciudad.label_tag }}
+            {{ form.ciudad }}
+        </div>
+        <div class="col-md-4">
+            {{ form.telefono.label_tag }}
+            {{ form.telefono }}
+        </div>
+        <div class="col-md-2">
+            {{ form.extension.label_tag }}
+            {{ form.extension }}
+        </div>
+        <div class="col-md-3">
+            {{ form.telefono2.label_tag }}
+            {{ form.telefono2 }}
+        </div>
+        <div class="col-md-3">
+            {{ form.movil.label_tag }}
+            {{ form.movil }}
         </div>
         <div class="col-md-6">
-            <label><strong>Ciudad:</strong></label>
-            <input type="text" name="ciudad" class="form-control" value="{{ cliente.ciudad }}">
+            {{ form.atencion_a.label_tag }}
+            {{ form.atencion_a }}
         </div>
         <div class="col-md-6">
-            <label><strong>Teléfono:</strong></label>
-            <input type="text" name="telefono" class="form-control" value="{{ cliente.telefono }}" pattern="\d{10}" title="Debe contener 10 dígitos numéricos" required>
-        </div>
-        <div class="col-md-6">
-            <label><strong>Atención:</strong></label>
-            <input type="text" name="atencion_a" class="form-control" value="{{ cliente.atencion_a }}">
-        </div>
-        <div class="col-md-6">
-            <label><strong>Obra:</strong></label>
-            <input type="text" name="obra" class="form-control" value="{{ cliente.obra }}">
-        </div>
-        <div class="col-md-6">
-            <label><strong>Localización:</strong></label>
-            <input type="text" name="localizacion" class="form-control" value="{{ cliente.localizacion }}">
-        </div>
-        <div class="col-md-6">
-            <label><strong>Correo:</strong></label>
-            <input type="email" name="correo" class="form-control" value="{{ cliente.correo }}">
+            {{ form.correo.label_tag }}
+            {{ form.correo }}
         </div>
 
         <div class="col-12 mt-4">
@@ -60,15 +73,29 @@
     </form>
 </div>
 
+{% if form.errors %}
+    <div class="alert alert-danger mt-3">
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-  const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
-  inputs.forEach(input => {
-    input.addEventListener('input', function() {
-      this.value = this.value.toUpperCase();
+        const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
     });
-  });
-});
 </script>
-
 {% endblock %}

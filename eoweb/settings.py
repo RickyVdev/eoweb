@@ -19,26 +19,29 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # ======================
 # CONFIGURACIÓN LOCAL
 # ======================
-#SECRET_KEY = '6!dbs_rb*b89tmkb8qpd5oc27i#73pdbu379y-0mr5evoqm4y_'
-#DEBUG = True
-#DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.sqlite3',
-#        'NAME': BASE_DIR / 'db.sqlite3',
-#    }
-#}
+'''
+SECRET_KEY = '6!dbs_rb*b89tmkb8qpd5oc27i#73pdbu379y-0mr5evoqm4y_'
+DEBUG = True
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}'''
 
 
 
 # ======================
 # CONFIGURACIÓN PRODUCCIÓN (RAILWAY)
 # ======================
+
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
     raise Exception("SECRET_KEY no definida. Agrega una variable de entorno 'SECRET_KEY'.")#DEBUG = os.getenv('DEBUG', 'False') == 'True'

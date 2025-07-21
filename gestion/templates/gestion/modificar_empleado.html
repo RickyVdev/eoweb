@@ -10,9 +10,9 @@
   <form method="post" class="row g-3">
     {% csrf_token %}
 
-    <div class="col-md-6">
-      <label>ID Personal </label>
-      <input type="text" name="id_personal" class="form-control" value="{{ empleado.id_personal }}" required>
+    <div class="col-md-4">
+      <label>ID Personal</label>
+      <input type="text" name="id_personal" class="form-control" value="{{ empleado.id_personal }}" readonly style="width: 200px;">
     </div>
     <div class="col-md-6">
       <label>Nombre</label>
@@ -24,7 +24,7 @@
     </div>
     <div class="col-md-6">
       <label>Teléfono</label>
-      <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}" pattern="\d{10}" title="Debe contener 10 dígitos numéricos" required>
+      <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}">
     </div>
         <div class="col-md-6">
       <label for="puesto">Puesto</label>
@@ -65,7 +65,7 @@
       <input type="text" name="tipo_sangre" class="form-control" value="{{ empleado.tipo_sangre }}">
     </div>
 
-    <div class="section-header">🔐 Usuario del sistema</div>
+    <div class="section-header">🔐 Acerca del Usuario</div>
 
     <div class="col-md-6">
       <label for="rol">Rol</label>

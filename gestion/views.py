@@ -16,6 +16,9 @@ from .models import Cliente, Empleado, EmpleadoDocumento, Puesto
 from .forms import ClienteForm
 from django.db.models import Q
 from django.http import HttpResponseForbidden  # para validación de permisos
+from django.db.models import Max
+from django.db.models.functions import Length
+from django.http import JsonResponse
 import os
 
 # Create your views here.
@@ -66,17 +69,29 @@ def lista_clientes(request):
         clientes = Cliente.objects.all()
     return render(request, 'gestion/lista_clientes.html', {'clientes': clientes})
 
+def generar_clave_cliente():
+    max_clave = Cliente.objects.aggregate(max=Max('clave'))['max']
+    try:
+        siguiente = int(max_clave) + 1 if max_clave else 1
+    except:
+        siguiente = Cliente.objects.count() + 1
+    return f"{siguiente:04d}"  # Esto da formato 0001, 0010, 0213
+
 @login_required
 def agregar_cliente(request):
-    if request.method == "POST": 
-        form = ClienteForm(request.POST, request.FILES)
+    if request.method == "POST":
+        form = ClienteForm(request.POST)
         if form.is_valid():
-            form.save()
+            cliente = form.save(commit=False)
+            if not cliente.clave:
+                cliente.clave = generar_clave_cliente()
+            cliente.save()
             messages.success(request, "Cliente agregado correctamente.")
             return redirect('lista_clientes')
     else:
-        form = ClienteForm()
-    
+        sugerencia = generar_clave_cliente()
+        form = ClienteForm(initial={'clave': sugerencia})
+
     return render(request, 'gestion/agregar_cliente.html', {'form': form})
 
 @login_required
@@ -84,20 +99,16 @@ def modificar_cliente(request, cliente_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
 
     if request.method == 'POST':
-        cliente.clave = request.POST.get('clave')
-        cliente.nombre = request.POST.get('nombre')
-        cliente.direccion = request.POST.get('direccion') 
-        cliente.colonia = request.POST.get('colonia')
-        cliente.ciudad = request.POST.get('ciudad')
-        cliente.telefono = request.POST.get('telefono')
-        cliente.atencion_a = request.POST.get('atencion_a')
-        cliente.obra = request.POST.get('obra')
-        cliente.localizacion = request.POST.get('localizacion')
-        cliente.correo = request.POST.get('correo')
-        cliente.save()
-        return redirect('lista_clientes')
+        form = ClienteForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Cliente modificado correctamente.")
+            return redirect('lista_clientes')
+    else:
+        form = ClienteForm(instance=cliente)
 
-    return render(request, 'gestion/modificar_cliente.html', {'cliente': cliente})
+    return render(request, 'gestion/modificar_cliente.html', {'form': form})
+
 
 
 @login_required
@@ -160,6 +171,34 @@ def lista_empleados(request):
         'empleados': empleados
     })
 
+def generar_id_empleado(puesto_nombre):
+    if not puesto_nombre:
+        return "EMP001"
+    puesto = puesto_nombre.upper()
+
+    if puesto.startswith("NIVEL UNO"):
+        prefijo = "NIVU"
+    elif puesto.startswith("NIVEL DOS"):
+        prefijo = "NIVD"
+    else:
+        palabras = puesto.split()
+        prefijo = ''.join([p[0]+p[1] for p in palabras if p.isalpha()])[:3].upper()
+        if len(prefijo) < 3:
+            prefijo = (prefijo + "")[:3]  # relleno por si acaso
+
+    # Buscar el número más alto existente con ese prefijo
+    existentes = Empleado.objects.filter(id_personal__startswith=prefijo).annotate(
+        longitud=Length('id_personal')
+    ).order_by('-longitud', '-id_personal')
+
+    if existentes.exists():
+        ultimo = existentes.first().id_personal
+        numero = ''.join(filter(str.isdigit, ultimo))
+        siguiente = int(numero) + 1 if numero else 1
+    else:
+        siguiente = 1
+
+    return f"{prefijo}{siguiente}"
 
 @login_required
 def agregar_empleado(request):
@@ -167,7 +206,6 @@ def agregar_empleado(request):
         return redirect('lista_empleados')
     
     if request.method == "POST":
-        id_personal = request.POST.get("id_personal", "").upper()
         nombre = request.POST.get("nombre", "").upper()
         email = request.POST.get("email", "").upper()
         telefono = request.POST.get("telefono", "").upper()
@@ -180,6 +218,9 @@ def agregar_empleado(request):
             puesto, _ = Puesto.objects.get_or_create(nombre=puesto_valor)
         else:
             puesto = None
+
+        id_personal = generar_id_empleado(puesto.nombre) if puesto else ""
+        
         username = request.POST.get("username")
         password = request.POST.get("password")
         rol = request.POST.get("rol")  # 'Administrador' o 'Empleado'
@@ -242,7 +283,15 @@ def agregar_empleado(request):
         return redirect('lista_empleados')
 
     puestos = Puesto.objects.all()
-    return render(request, 'gestion/agregar_empleado.html', {'puestos': puestos})
+    id_sugerido = ""
+    if puestos:
+        primer_puesto = puestos.first()
+        id_sugerido = generar_id_empleado(primer_puesto.nombre) if primer_puesto else ""
+
+    return render(request, 'gestion/agregar_empleado.html', {
+        'puestos': puestos,
+        'id_sugerido': id_sugerido
+    })
 
 
 @login_required
@@ -272,8 +321,8 @@ def modificar_empleado(request, empleado_id):
         telefono = request.POST.get("telefono")
 
         # ✅ Validación de teléfono (solo dígitos y longitud exacta)
-        if not telefono.isdigit() or len(telefono) != 10:
-            messages.error(request, "El teléfono debe contener exactamente 10 dígitos numéricos.")
+        if not telefono.isdigit():
+            messages.error(request, "El teléfono debe contener solamente numeros.")
             return redirect('modificar_empleado', empleado_id=empleado.id)
 
         empleado.telefono = telefono
@@ -475,3 +524,18 @@ def password_reset_by_username(request):
     return render(request, 'registration/password_reset_form.html')
 
 
+
+@login_required
+def obtener_id_empleado_ajax(request):
+    if request.method == 'GET':
+        puesto_id = request.GET.get('puesto_id')
+
+        if not puesto_id:
+            return JsonResponse({'error': 'No se envió ID de puesto'}, status=400)
+
+        try:
+            puesto = Puesto.objects.get(id=puesto_id)
+            nuevo_id = generar_id_empleado(puesto.nombre)
+            return JsonResponse({'id_personal': nuevo_id})
+        except Puesto.DoesNotExist:
+            return JsonResponse({'error': 'Puesto no encontrado'}, status=404)

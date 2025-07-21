@@ -1,20 +1,28 @@
 {% extends "gestion/base.html" %}
 {% load static %}
 
+{% block title %}Agregar Cliente{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">Agregar Cliente</h2>
     <form method="post" class="row g-3">
         {% csrf_token %}
 
-        <div class="col-md-4">
+        <div class="col-md-2">
             {{ form.clave.label_tag }} {{ form.clave }}
         </div>
         <div class="col-md-8">
             {{ form.nombre.label_tag }} {{ form.nombre }}
         </div>
         <div class="col-md-6">
-            {{ form.direccion.label_tag }} {{ form.direccion }}
+            {{ form.calle.label_tag }} {{ form.calle }}
+        </div>
+        <div class="col-md-3">
+            {{ form.numero_exterior.label_tag }} {{ form.numero_exterior }}
+        </div>
+        <div class="col-md-3">
+            {{ form.numero_interior.label_tag }} {{ form.numero_interior }}
         </div>
         <div class="col-md-6">
             {{ form.colonia.label_tag }} {{ form.colonia }}
@@ -22,8 +30,17 @@
         <div class="col-md-6">
             {{ form.ciudad.label_tag }} {{ form.ciudad }}
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             {{ form.telefono.label_tag }} {{ form.telefono }}
+        </div>
+        <div class="col-md-2">
+            {{ form.extension.label_tag }} {{ form.extension }}
+        </div>
+        <div class="col-md-3">
+            {{ form.telefono2.label_tag }} {{ form.telefono2 }}
+        </div>
+        <div class="col-md-3">
+            {{ form.movil.label_tag }} {{ form.movil }}
         </div>
         <div class="col-md-6">
             {{ form.atencion_a.label_tag }} {{ form.atencion_a }}

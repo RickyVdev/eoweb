@@ -10,11 +10,11 @@
   <form method="post" class="row g-3">
     {% csrf_token %}
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       <label>ID Personal</label>
-      <input type="text" id="id_personal" name="id_personal" value="{{ id_sugerido }}" class="form-control" readonly maxlength="10" style="width: 200px;">
+      <input type="text" id="id_personal" name="id_personal" value="{{ id_sugerido }}" class="form-control" readonly>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-9">
       <label>Nombre</label>
       <input type="text" name="nombre" class="form-control" required>
     </div>

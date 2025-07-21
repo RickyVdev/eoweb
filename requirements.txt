@@ -1,7 +1,7 @@
 Django==5.2.1
 python-decouple==3.8
 dj-database-url==3.0.0
-whitenoise==6.6.0
+whitenoise
 gunicorn==21.2.0
 sqlparse==0.5.3
 pytz==2022.6

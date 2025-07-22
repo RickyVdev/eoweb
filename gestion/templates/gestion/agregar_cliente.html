@@ -90,7 +90,19 @@
       this.value = this.value.toUpperCase();
     });
   });
-});
+
+  // Validar solo números en campos específicos
+        const soloNumeros = ['id_numero_exterior', 'id_numero_interior', 'id_telefono', 'id_telefono2', 'id_movil', 'id_extension'];
+        soloNumeros.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
+    });
+
 </script>
 
 {% endblock %}

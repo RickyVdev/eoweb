@@ -209,6 +209,9 @@ def agregar_empleado(request):
         nombre = request.POST.get("nombre", "").upper()
         email = request.POST.get("email", "").upper()
         telefono = request.POST.get("telefono", "").upper()
+        if not telefono.isdigit():
+            messages.error(request, "El teléfono solo debe contener números.")
+            return redirect("formulario_cliente")
         puesto_valor = request.POST.get("puesto", "").upper()
 
         # Si es un número, intenta buscar por ID. Si no, busca por nombre o crea uno nuevo.

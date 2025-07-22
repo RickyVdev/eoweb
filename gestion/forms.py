@@ -61,9 +61,26 @@ class ClienteForm(forms.ModelForm):
         }
 
         
+    def clean_numero_exterior(self):
+        dato = self.cleaned_data['numero_exterior']
+        if dato and not dato.isdigit():
+            raise forms.ValidationError("Solo se permiten números.")
+        return dato
+
+    def clean_numero_interior(self):
+        dato = self.cleaned_data['numero_interior']
+        if dato and not dato.isdigit():
+            raise forms.ValidationError("Solo se permiten números.")
+        return dato
     
-    '''def clean_telefono(self):
+    def clean_telefono(self):
             telefono = self.cleaned_data.get('telefono')
             if not telefono.isdigit():
                 raise forms.ValidationError("El teléfono debe contener solamente números.")
-            return telefono'''
+            return telefono
+    
+    def clean_telefono2(self):
+            telefono2 = self.cleaned_data.get('telefono2')
+            if not telefono2.isdigit():
+                raise forms.ValidationError("El teléfono debe contener solamente números.")
+            return telefono2

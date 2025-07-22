@@ -7,8 +7,8 @@ class Cliente(models.Model):
     clave = models.CharField(max_length=100, unique=True, null=True, blank=True)
     nombre = models.CharField("Nombre", max_length=255)
     calle = models.CharField("Calle", max_length=100, blank=True, null=True)
-    numero_exterior = models.CharField("Número exterior", max_length=10, blank=True, null=True)
-    numero_interior = models.CharField("Número interior", max_length=10, blank=True, null=True)
+    numero_exterior = models.CharField("Número exterior", max_length=5, blank=True, null=True)
+    numero_interior = models.CharField("Número interior", max_length=5, blank=True, null=True)
     colonia = models.CharField("Colonia", max_length=100)
     ciudad = models.CharField("Ciudad", max_length=100)
     telefono = models.CharField("Teléfono 1", max_length=10, blank=True)
@@ -34,7 +34,7 @@ class Empleado(models.Model):
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     nombre = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
-    telefono = models.CharField(max_length=20, blank=True)
+    telefono = models.CharField(max_length=10, blank=True)
     puesto_antiguo = models.CharField(max_length=100, null=True, blank=True)  # renombrado
     puesto = models.ForeignKey(Puesto, on_delete=models.SET_NULL, null=True, blank=True)
 

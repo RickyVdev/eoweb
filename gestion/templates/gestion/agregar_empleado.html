@@ -26,7 +26,8 @@
     </div>
     <div class="col-md-6">
       <label>Teléfono</label>
-      <input type="text" name="telefono" class="form-control" title="Introduce un número de 10 dígitos">
+      <input type="text" name="telefono" class="form-control" title="Introduce un número de 10 dígitos" maxlength="10"
+       pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
     </div>
     <div class="col-md-6">
       <label for="cargo">Puesto</label>
@@ -50,11 +51,12 @@
     </div>
     <div class="col-md-6">
       <label>Código Postal</label>
-      <input type="text" name="codigo_postal" class="form-control">
+      <input type="text" name="codigo_postal" class="form-control" maxlength="5"
+       pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
     </div>
     <div class="col-md-6">
       <label>RFC</label>
-      <input type="text" name="rfc" class="form-control">
+      <input type="text" name="rfc" class="form-control" maxlength="13">
     </div>
     <div class="col-md-6">
       <label>Fecha de Nacimiento</label>
@@ -62,7 +64,7 @@
     </div>
     <div class="col-md-6">
       <label>Tipo de Sangre</label>
-      <input type="text" name="tipo_sangre" class="form-control">
+      <input type="text" name="tipo_sangre" class="form-control" maxlength="3">
     </div>
 
     <div class="section-header">🔐 Acerca del Usuario</div>

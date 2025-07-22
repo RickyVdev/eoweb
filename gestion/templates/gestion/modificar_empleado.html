@@ -14,11 +14,11 @@
 
     <div class="col-md-3">
       <label>ID Personal</label>
-      <input type="text" id="id_personal" name="id_personal" value="{{ id_sugerido }}" class="form-control" readonly>
+      <input type="text" id="id_personal" name="id_personal" value="{{ empleado.id_personal }}" class="form-control" readonly>
     </div>
     <div class="col-md-9">
       <label>Nombre</label>
-      <input type="text" name="nombre" class="form-control" required>
+      <input type="text" name="nombre" class="form-control" value="{{ empleado.nombre }}" required>
     </div>
     <div class="col-md-6">
       <label>Email</label>
@@ -26,7 +26,8 @@
     </div>
     <div class="col-md-6">
       <label>Teléfono</label>
-      <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}">
+      <input type="text" name="telefono" class="form-control" value="{{ empleado.telefono }}" maxlength="10"
+       pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
     </div>
     <div class="col-md-6">
       <label for="puesto">Puesto</label>
@@ -52,11 +53,12 @@
     </div>
     <div class="col-md-6">
       <label>Código Postal</label>
-      <input type="text" name="codigo_postal" class="form-control" value="{{ empleado.codigo_postal }}">
+      <input type="text" name="codigo_postal" class="form-control" value="{{ empleado.codigo_postal }}" maxlength="5"
+       pattern="\d*" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
     </div>
     <div class="col-md-6">
       <label>RFC</label>
-      <input type="text" name="rfc" class="form-control" value="{{ empleado.rfc }}">
+      <input type="text" name="rfc" class="form-control" value="{{ empleado.rfc }}" maxlength="13">
     </div>
     <div class="col-md-6">
       <label>Fecha de Nacimiento</label>
@@ -64,7 +66,7 @@
     </div>
     <div class="col-md-6">
       <label>Tipo de Sangre</label>
-      <input type="text" name="tipo_sangre" class="form-control" value="{{ empleado.tipo_sangre }}">
+      <input type="text" name="tipo_sangre" class="form-control" value="{{ empleado.tipo_sangre }}" maxlength="3">
     </div>
 
     <div class="section-header">🔐 Acerca del Usuario</div>

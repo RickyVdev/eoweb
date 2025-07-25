@@ -19,6 +19,7 @@ from django.http import HttpResponseForbidden  # para validación de permisos
 from django.db.models import Max
 from django.db.models.functions import Length
 from django.http import JsonResponse
+from django.db import IntegrityError
 import os
 
 # Create your views here.
@@ -85,9 +86,13 @@ def agregar_cliente(request):
             cliente = form.save(commit=False)
             if not cliente.clave:
                 cliente.clave = generar_clave_cliente()
-            cliente.save()
-            messages.success(request, "Cliente agregado correctamente.")
-            return redirect('lista_clientes')
+            try:
+                cliente.save()
+                messages.success(request, "Cliente agregado correctamente.")
+                return redirect('lista_clientes')
+            except IntegrityError:
+                messages.error(request, f"Ya existe un cliente con la clave {cliente.clave}.")
+                form.add_error('clave', "Ya existe un cliente con esta clave.")
     else:
         sugerencia = generar_clave_cliente()
         form = ClienteForm(initial={'clave': sugerencia})

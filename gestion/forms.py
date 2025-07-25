@@ -81,6 +81,12 @@ class ClienteForm(forms.ModelForm):
     
     def clean_telefono2(self):
             telefono2 = self.cleaned_data.get('telefono2')
-            if not telefono2.isdigit():
+            if telefono2 and not telefono2.isdigit():
                 raise forms.ValidationError("El teléfono debe contener solamente números.")
             return telefono2
+    
+    def clean_movil(self):
+            movil = self.cleaned_data.get('movil')
+            if movil and not movil.isdigit():
+                raise forms.ValidationError("El teléfono debe contener solamente números.")
+            return movil

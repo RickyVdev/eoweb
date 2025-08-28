@@ -7,10 +7,10 @@
 <h2>Hola! {{ request.user.username }}  que bueno verte</h2>
 {% if es_superusuario or es_admin %}
 <p>Desde aquí podrás administrar a nuestros clientes y empleados.</p>
-{% endif %}
-
-{% if not es_superusuario and not es_admin %}
-<p>Desde aquí podrás ver a nuestros clientes</p>
+{% elif es_supervisor %}
+<p>Desde aquí podrás ver y modificar clientes, agregar/editar obras y servicios.</p>
+{% else %}
+<p>Desde aquí podrás ver a los servicios que se te asignaron.</p>
 {% endif %}
 
 
@@ -19,15 +19,29 @@
   <li><a href="{% url 'lista_empleados' %}">Empleados</a></li>
 </ul>-->
 
+{% if es_superusuario or es_admin or es_supervisor %}
 <a href="{% url 'lista_clientes' %}" class="btn btn-outline-primary text-center">
     <img src="{% static 'gestion/img/Clientes.png' %}" alt="Clientes" width="250px" height="250px"><br>
     Clientes
 </a>
+{% endif %}
 
 {% if es_superusuario or es_admin %}
 <a href="{% url 'lista_empleados' %}" class="btn btn-outline-primary text-center">
-    <img src="{% static 'gestion/img/Empleados.png' %}" alt="Clientes" width="250px" height="250px"><br>
+    <img src="{% static 'gestion/img/Empleados.png' %}" alt="Empleados" width="250px" height="250px"><br>
     Empleados
+</a>
+{% endif %}
+
+{% if es_supervisor or es_superusuario or es_admin %}
+<a href="{% url 'listado_obras' %}" class="btn btn-outline-primary text-center">
+    <img src="{% static 'gestion/img/Obras.png' %}" alt="Obras" width="250px" height="250px"><br>
+    Obras
+</a>
+
+<a href="{% url 'lista_servicios' %}" class="btn btn-outline-primary text-center">
+    <img src="{% static 'gestion/img/Servicios.png' %}" alt="Servicios" width="250px" height="250px"><br>
+    Servicios
 </a>
 {% endif %}
 

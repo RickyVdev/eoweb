@@ -1,0 +1,391 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Modificar Servicio{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Modificar Servicio para {{ form.instance.obra.cliente.nombre }}</h2>
+  <h3 class="mb-4 text-center">En la obra: {{ form.instance.obra.nombre }}</h3>
+
+  <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+    {% csrf_token %}
+
+    <div class="row">
+      <div class="col-md-4 mb-3">
+        {{ form.fecha.label_tag }} {{ form.fecha }}
+      </div>
+      <div class="col-md-2 mb-3">
+        {{ form.otvm.label_tag }} {{ form.otvm }}
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="localizacion">Localización</label>
+        <input type="text" class="form-control" id="localizacion" value="{{ form.instance.obra.localizacion }}" readonly>
+      </div>
+      <div class="col-md-3 mb-3">
+        {{ form.llegada.label_tag }} {{ form.llegada }}
+      </div>
+      <div class="col-md-3 mb-3">
+        {{ form.termino.label_tag }} {{ form.termino }}
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.solicitante.label_tag }} {{ form.solicitante }}
+      </div>
+      <div class="col-md-6 mb-3">
+        <label for="clave_cliente">Clave del Cliente</label>
+        <input type="text" class="form-control" id="clave_cliente" value="{{ form.instance.obra.cliente.clave }}" readonly>
+      </div>
+      <div class="col-md-6 mb-3">
+        {{ form.preguntar_por.label_tag }} {{ form.preguntar_por }}
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label for="trabajo_realizado">Trabajo Realizado</label>
+        <div class="input-group">
+          <select id="trabajo_realizado" name="trabajo_realizado" class="form-select">
+            {% for trabajo in trabajos %}
+              <option value="{{ trabajo.id }}" {% if form.instance.trabajo_realizado.id == trabajo.id %}selected{% endif %}>{{ trabajo.nombre }}</option>
+            {% endfor %}
+          </select>
+          <input type="text" id="nuevo_trabajo" class="form-control" placeholder="Otro...">
+          <button type="button" class="btn btn-outline-secondary" onclick="agregarTrabajo()">Agregar</button>
+          <button type="button" class="btn btn-outline-danger" onclick="eliminarTrabajo()">Eliminar</button>
+        </div>
+      </div>
+
+      <div class="col-md-2 mb-3">
+        {{ form.cantidad.label_tag }} {{ form.cantidad }}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      {{ form.observaciones.label_tag }} {{ form.observaciones }}
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label for="empleado_asignado">Empleado Asignado</label>
+      <select name="empleado_asignado" id="empleado_asignado" class="form-select">
+        <option value="">-- Selecciona un empleado --</option>
+        {% for empleado in form.fields.empleado_asignado.queryset %}
+          <option value="{{ empleado.id }}"
+            {% if form.instance.empleado_asignado and form.instance.empleado_asignado.id == empleado.id %}selected{% endif %}>
+            {{ empleado.username }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <hr>
+
+    <h5>VoBo Cliente</h5>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        {{ form.vobo_cliente_nombre.label_tag }} {{ form.vobo_cliente_nombre }}
+      </div>
+      <div class="col-md-12 mb-3">
+        <label>Firma VoBo Cliente</label><br>
+        {% if form.instance.vobo_cliente_firma %}
+          <div class="border mb-2 p-2 text-center">
+            <img src="{{ form.instance.vobo_cliente_firma.url }}" alt="Firma actual" style="max-height:100px;">
+          </div>
+          <small class="text-muted">Si dibujas en el recuadro, esta firma será reemplazada</small>
+        {% endif %}
+        <canvas id="canvas_vobo_cliente" width="300" height="100" style="border:1px solid #000;"></canvas>
+        <input type="hidden" name="firma_vobo_cliente_data" id="firma_vobo_cliente_data">
+        <button type="button" onclick="guardarFirma('canvas_vobo_cliente', 'firma_vobo_cliente_data')">Guardar Firma</button>
+        <button type="button" onclick="clearCanvas('canvas_vobo_cliente')">Borrar</button>
+      </div>
+    </div>
+
+    <h5>Por el Lab</h5>
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        {{ form.lab_nombre.label_tag }} {{ form.lab_nombre }}
+      </div>
+      <div class="col-md-12 mb-3">
+        <label>Firma Por el Lab</label><br>
+        {% if form.instance.lab_firma %}
+          <div class="border mb-2 p-2 text-center">
+            <img src="{{ form.instance.lab_firma.url }}" alt="Firma actual" style="max-height:100px;">
+          </div>
+          <small class="text-muted">Si dibujas en el recuadro, esta firma será reemplazada</small>
+        {% endif %}
+        <canvas id="canvas_lab" width="300" height="100" style="border:1px solid #000;"></canvas>
+        <input type="hidden" name="firma_lab_data" id="firma_lab_data">
+        <button type="button" onclick="guardarFirma('canvas_lab', 'firma_lab_data')">Guardar Firma</button>
+        <button type="button" onclick="clearCanvas('canvas_lab')">Borrar</button>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Supervisó -->
+    <h5>Supervisó</h5>
+    <div class="row">
+      <div class="col-md-6 mb-3">{{ form.superviso_nombre.label_tag }} {{ form.superviso_nombre }}</div>
+      <div class="col-md-6 mb-3">{{ form.superviso_fecha.label_tag }} {{ form.superviso_fecha }}</div>
+      <div class="col-md-12 mb-3">
+        <label>Iniciales y Firma Supervisó</label><br>
+        {% if form.instance.superviso_firma %}
+          <div class="border mb-2 p-2 text-center">
+            <img src="{{ form.instance.superviso_firma.url }}" alt="Firma actual" style="max-height:100px;">
+          </div>
+          <small class="text-muted">Si dibujas en el recuadro, esta firma será reemplazada</small>
+        {% endif %}
+        <canvas id="canvas_superviso" width="300" height="100" style="border:1px solid #000;"></canvas>
+        <input type="hidden" id="firma_superviso_data" name="firma_superviso_data">
+        <button type="button" onclick="guardarFirma('canvas_superviso', 'firma_superviso_data')">Guardar Firma</button>
+        <button type="button" onclick="clearCanvas('canvas_superviso')">Borrar</button>
+      </div>
+    </div>
+
+    <h5>Capturó</h5>
+    <div class="row">
+      <div class="col-md-6 mb-3">{{ form.capturo_nombre.label_tag }} {{ form.capturo_nombre }}</div>
+      <div class="col-md-6 mb-3">{{ form.capturo_fecha.label_tag }} {{ form.capturo_fecha }}</div>
+      <div class="col-md-12 mb-3">
+        <label>Iniciales y Firma Capturó</label><br>
+        {% if form.instance.capturo_firma %}
+          <div class="border mb-2 p-2 text-center">
+            <img src="{{ form.instance.capturo_firma.url }}" alt="Firma actual" style="max-height:100px;">
+          </div>
+          <small class="text-muted">Si dibujas en el recuadro, esta firma será reemplazada</small>
+        {% endif %}
+        <canvas id="canvas_capturo" width="300" height="100" style="border:1px solid #000;"></canvas>
+        <input type="hidden" id="firma_capturo_data" name="firma_capturo_data">
+        <button type="button" onclick="guardarFirma('canvas_capturo', 'firma_capturo_data')">Guardar Firma</button>
+        <button type="button" onclick="clearCanvas('canvas_capturo')">Borrar</button>
+      </div>
+    </div>
+
+    <h5>Facturó</h5>
+    <div class="row">
+      <div class="col-md-4 mb-3">{{ form.facturo_nombre.label_tag }} {{ form.facturo_nombre }}</div>
+      <div class="col-md-4 mb-3">{{ form.factura_numero.label_tag }} {{ form.factura_numero }}</div>
+      <div class="col-md-4 mb-3">{{ form.facturo_fecha.label_tag }} {{ form.facturo_fecha }}</div>
+      <div class="col-md-12 mb-3">
+        <label>Iniciales y Firma Facturó</label><br>
+        {% if form.instance.facturo_firma %}
+          <div class="border mb-2 p-2 text-center">
+            <img src="{{ form.instance.facturo_firma.url }}" alt="Firma actual" style="max-height:100px;">
+          </div>
+          <small class="text-muted">Si dibujas en el recuadro, esta firma será reemplazada</small>
+        {% endif %}
+        <canvas id="canvas_facturo" width="250" height="100" style="border:1px solid #000;"></canvas>
+        <input type="hidden" id="firma_facturo_data" name="firma_facturo_data">
+        <button type="button" onclick="guardarFirma('canvas_facturo', 'firma_facturo_data')">Guardar Firma</button>
+        <button type="button" onclick="clearCanvas('canvas_facturo')">Borrar</button>
+      </div>
+    </div>
+
+    <h5>Autorizó</h5>
+    <div class="row">
+      <div class="col-md-6 mb-3">{{ form.autorizo_nombre.label_tag }} {{ form.autorizo_nombre }}</div>
+      <div class="col-md-6 mb-3">{{ form.autorizo_fecha.label_tag }} {{ form.autorizo_fecha }}</div>
+      <div class="col-md-12 mb-3">
+        <label>Iniciales y Firma Autorizó</label><br>
+        {% if form.instance.autorizo_firma %}
+          <div class="border mb-2 p-2 text-center">
+            <img src="{{ form.instance.autorizo_firma.url }}" alt="Firma actual" style="max-height:100px;">
+          </div>
+          <small class="text-muted">Si dibujas en el recuadro, esta firma será reemplazada</small>
+        {% endif %}
+        <canvas id="canvas_autorizo" width="300" height="100" style="border:1px solid #000;"></canvas>
+        <input type="hidden" id="firma_autorizo_data" name="firma_autorizo_data">
+        <button type="button" onclick="guardarFirma('canvas_autorizo', 'firma_autorizo_data')">Guardar Firma</button>
+        <button type="button" onclick="clearCanvas('canvas_autorizo')">Borrar</button>
+      </div>
+    </div>
+
+
+    <!-- Botones -->
+    <div class="text-center mt-5">
+      <!--<button type="button" class="btn btn-info" onclick="guardarTodasFirmas()">Guardar Todas las Firmas</button>-->
+      <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+      <a href="{% url 'ver_servicios' form.instance.obra.id %}" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+
+<script>
+function agregarTrabajo() {
+    const nuevoInput = document.getElementById("nuevo_trabajo");
+    const select = document.getElementById("trabajo_realizado");
+    const nuevoValor = nuevoInput.value.trim();
+
+    if (nuevoValor) {
+        const opcion = document.createElement("option");
+        opcion.text = nuevoValor;
+        opcion.value = "nuevo_" + nuevoValor; // marcar como nuevo
+        opcion.setAttribute("data-original", "false");
+        opcion.selected = true;
+        select.appendChild(opcion);
+        nuevoInput.value = "";
+    } else {
+        alert("Escribe un nombre antes de agregar.");
+    }
+}
+
+function eliminarTrabajo() {
+    const select = document.getElementById("trabajo_realizado");
+    const seleccionada = select.options[select.selectedIndex];
+
+    if (!seleccionada.hasAttribute("data-original") || seleccionada.getAttribute("data-original") === "false") {
+        select.removeChild(seleccionada);
+    } else {
+        alert("Solo puedes eliminar trabajos agregados manualmente.");
+    }
+}
+
+// =====================
+// Script para las firmas
+// =====================
+// =====================
+// Función general para limpiar canvas
+// =====================
+function clearCanvas(id) {
+  const canvas = document.getElementById(id);
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// =====================
+// Función para guardar firma en el input hidden
+// =====================
+function guardarFirma(canvasId, inputId) {
+  const canvas = document.getElementById(canvasId);
+  const input = document.getElementById(inputId);
+  if (!canvas || !input) return;
+  const dataUrl = canvas.toDataURL("image/png");
+  input.value = dataUrl;
+  console.log("Firma guardada en", inputId, dataUrl.substring(0,50));
+}
+
+function guardarTodasFirmas() {
+  guardarFirma('canvas_superviso', 'firma_superviso_data');
+  guardarFirma('canvas_capturo', 'firma_capturo_data');
+  guardarFirma('canvas_facturo', 'firma_facturo_data');
+  guardarFirma('canvas_autorizo', 'firma_autorizo_data');
+  guardarFirma('canvas_vobo_cliente', 'firma_vobo_cliente_data');
+  guardarFirma('canvas_lab', 'firma_lab_data');
+
+  alert("✅ Todas las firmas fueron guardadas correctamente.");
+}
+
+// =====================
+// Inicializa un canvas para dibujar
+// =====================
+function initSignature(canvasId, inputId) {
+  const canvas = document.getElementById(canvasId);
+  const input = document.getElementById(inputId);
+  if (!canvas || !input) return;
+
+  const ctx = canvas.getContext("2d");
+  let drawing = false;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches) {
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top
+      };
+    } else {
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+  }
+
+  function startDraw(e) {
+    drawing = true;
+    const p = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+  }
+
+  function endDraw() {
+    drawing = false;
+  }
+
+  function draw(e) {
+    if (!drawing) return;
+    const p = getPos(e);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#000";
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    e.preventDefault();
+  }
+
+  // Eventos mouse
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mouseup", endDraw);
+  canvas.addEventListener("mouseout", endDraw);
+  canvas.addEventListener("mousemove", draw);
+
+  // Eventos táctiles
+  canvas.addEventListener("touchstart", startDraw);
+  canvas.addEventListener("touchend", endDraw);
+  canvas.addEventListener("touchcancel", endDraw);
+  canvas.addEventListener("touchmove", draw);
+
+  // Borrar canvas
+  window["clearCanvas_" + canvasId] = function() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    input.value = "";
+  };
+}
+
+// =====================
+// Inicializar los 4 canvas
+// =====================
+document.addEventListener('DOMContentLoaded', function() {
+  initSignature("canvas_superviso", "firma_superviso_data");
+  initSignature("canvas_capturo", "firma_capturo_data");
+  initSignature("canvas_facturo", "firma_facturo_data");
+  initSignature("canvas_autorizo", "firma_autorizo_data");
+  initSignature("canvas_vobo_cliente", "firma_vobo_cliente_data");
+  initSignature("canvas_lab", "firma_lab_data");
+
+  // Guardar todas las firmas automáticamente al enviar
+  document.querySelector("form").addEventListener("submit", function() {
+    guardarFirma('canvas_superviso', 'firma_superviso_data');
+    guardarFirma('canvas_capturo', 'firma_capturo_data');
+    guardarFirma('canvas_facturo', 'firma_facturo_data');
+    guardarFirma('canvas_autorizo', 'firma_autorizo_data');
+    guardarFirma('canvas_vobo_cliente', 'firma_vobo_cliente_data');
+    guardarFirma('canvas_lab', 'firma_lab_data');
+
+    console.log("=== DEBUG FIRMAS AL ENVIAR ===");
+    console.log("Superviso:", document.getElementById("firma_superviso_data").value.substring(0,50));
+    console.log("Capturó:", document.getElementById("firma_capturo_data").value.substring(0,50));
+    console.log("Facturó:", document.getElementById("firma_facturo_data").value.substring(0,50));
+    console.log("Autorizó:", document.getElementById("firma_autorizo_data").value.substring(0,50));
+    console.log("VoBo Cliente:", document.getElementById("firma_vobo_cliente_data").value.substring(0,50));
+    console.log("Lab:", document.getElementById("firma_lab_data").value.substring(0,50));
+  });
+});
+</script>
+
+{% if form.errors %}
+  <div class="alert alert-danger mt-3">
+    <ul>
+      {% for field in form %}
+        {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+{% endblock %}

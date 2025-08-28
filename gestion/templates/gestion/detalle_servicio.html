@@ -1,0 +1,142 @@
+{% extends "gestion/base.html" %}
+
+{% block title %}Detalle del Servicio{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Servicio - O.T.V.M. {{ servicio.otvm }}</h2>
+
+  <!-- Información general -->
+  <div class="card mb-4">
+    <div class="card-header bg-primary text-white">Información del Servicio</div>
+    <div class="card-body">
+      <div class="row mb-2">
+        <div class="col-md-6"><strong>Obra:</strong> {{ servicio.obra.nombre }}</div>
+        <div class="col-md-6"><strong>Cliente:</strong> {{ servicio.obra.cliente.nombre }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6"><strong>Fecha:</strong> {{ servicio.fecha }}</div>
+        <div class="col-md-2"><strong>Llegada:</strong> {{ servicio.llegada }}</div>
+        <div class="col-md-4"><strong>Término:</strong> {{ servicio.termino }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6"><strong>Solicitante:</strong> {{ servicio.solicitante }}</div>
+        <div class="col-md-6"><strong>Preguntar por:</strong> {{ servicio.preguntar_por }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6"><strong>Trabajo realizado:</strong> {{ servicio.trabajo_realizado.nombre }}</div>
+        <div class="col-md-6"><strong>Cantidad:</strong> {{ servicio.cantidad }}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-6"><strong>Observaciones:</strong><br>{{ servicio.observaciones|linebreaksbr }}</div>
+        <div class="col-md-6"><strong>Empleado:</strong> {{ servicio.empleado_asignado.username }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VoBo y Firmas -->
+  <div class="card mb-4">
+    <div class="card-header bg-secondary text-white">VoBo y Firmas</div>
+    <div class="card-body">
+      <!-- VoBo Cliente -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <strong>VoBo Cliente:</strong> {{ servicio.vobo_cliente_nombre }}
+          {% if servicio.vobo_cliente_firma %}
+            <div class="border mt-2 p-2 text-center">
+              <img src="{{ servicio.vobo_cliente_firma.url }}" alt="Firma VoBo Cliente" style="max-height: 100px;">
+            </div>
+          {% else %}
+            <div class="border mt-2 p-4 text-center text-muted">(Sin firma)</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Por el Lab -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <strong>Por el Lab:</strong> {{ servicio.lab_nombre }}
+          {% if servicio.lab_firma %}
+            <div class="border mt-2 p-2 text-center">
+              <img src="{{ servicio.lab_firma.url }}" alt="Firma Lab" style="max-height: 100px;">
+            </div>
+          {% else %}
+            <div class="border mt-2 p-4 text-center text-muted">(Sin firma)</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Supervisó -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <strong>Supervisó:</strong> {{ servicio.superviso_nombre }}
+          {% if servicio.superviso_firma %}
+            <div class="border mt-2 p-2 text-center">
+              <img src="{{ servicio.superviso_firma.url }}" alt="Firma Supervisó" style="max-height: 100px;">
+            </div>
+          {% else %}
+            <div class="border mt-2 p-4 text-center text-muted">(Sin firma)</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6"><strong>Fecha Supervisión:</strong> {{ servicio.superviso_fecha }}</div>
+      </div>
+
+      <!-- Capturó -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <strong>Capturó:</strong> {{ servicio.capturo_nombre }}
+          {% if servicio.capturo_firma %}
+            <div class="border mt-2 p-2 text-center">
+              <img src="{{ servicio.capturo_firma.url }}" alt="Firma Capturó" style="max-height: 100px;">
+            </div>
+          {% else %}
+            <div class="border mt-2 p-4 text-center text-muted">(Sin firma)</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6"><strong>Fecha Captura:</strong> {{ servicio.capturo_fecha }}</div>
+      </div>
+
+      <!-- Facturó -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <strong>Facturó:</strong> {{ servicio.facturo_nombre }}
+          {% if servicio.facturo_firma %}
+            <div class="border mt-2 p-2 text-center">
+              <img src="{{ servicio.facturo_firma.url }}" alt="Firma Facturó" style="max-height: 100px;">
+            </div>
+          {% else %}
+            <div class="border mt-2 p-4 text-center text-muted">(Sin firma)</div>
+          {% endif %}
+        </div>
+        <div class="col-md-2"><strong>Factura #:</strong> {{ servicio.factura_numero }}</div>
+        <div class="col-md-4"><strong>Fecha Factura:</strong> {{ servicio.facturo_fecha }}</div>
+      </div>
+
+      <!-- Autorizó -->
+      <div class="row mb-2">
+        <div class="col-md-6">
+          <strong>Autorizó:</strong> {{ servicio.autorizo_nombre }}
+          {% if servicio.autorizo_firma %}
+            <div class="border mt-2 p-2 text-center">
+              <img src="{{ servicio.autorizo_firma.url }}" alt="Firma Autorizó" style="max-height: 100px;">
+            </div>
+          {% else %}
+            <div class="border mt-2 p-4 text-center text-muted">(Sin firma)</div>
+          {% endif %}
+        </div>
+        <div class="col-md-6"><strong>Fecha Autorización:</strong> {{ servicio.autorizo_fecha }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="text-center">
+    <a href="{% url 'ver_servicios' servicio.obra.id %}" class="btn btn-secondary">Volver</a>
+    <a href="{% url 'modificar_servicio' servicio.id %}" class="btn btn-warning">Modificar</a>
+    <form action="{% url 'eliminar_servicio' servicio.id %}" method="post" style="display: inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este servicio?')">Eliminar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

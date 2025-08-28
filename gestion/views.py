@@ -1,9 +1,9 @@
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import get_object_or_404
+from django.views.decorators.http import require_POST
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -12,15 +12,17 @@ from django.template.loader import render_to_string
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.sites.shortcuts import get_current_site
-from .models import Cliente, Empleado, EmpleadoDocumento, Puesto
-from .forms import ClienteForm
+from .models import Cliente, Empleado, EmpleadoDocumento, Puesto, Obra, Servicio, TrabajoRealizado
+from .forms import ClienteForm, ServicioForm, ObraForm
 from django.db.models import Q
 from django.http import HttpResponseForbidden  # para validación de permisos
 from django.db.models import Max
 from django.db.models.functions import Length
 from django.http import JsonResponse
 from django.db import IntegrityError
-import os
+from django.core.files.base import ContentFile
+from datetime import date
+import base64, uuid
 
 # Create your views here.
 def login_view(request):
@@ -39,12 +41,16 @@ def login_view(request):
 
 @login_required
 def inicio(request):
-    es_admin = request.user.groups.filter(name='Administrador').exists()
-    es_superusuario = request.user.is_superuser
+    usuario = request.user
+    es_superusuario = usuario.is_superuser
+    es_admin = usuario.groups.filter(name="Administrador").exists()
+    es_supervisor = usuario.groups.filter(name="Supervisor").exists()
+    # Los empleados normales no necesitan flag especial; se asume por exclusión
 
-    return render(request, 'gestion/inicio.html', {
-        'es_admin': es_admin,
-        'es_superusuario': es_superusuario
+    return render(request, "gestion/inicio.html", {
+        "es_superusuario": es_superusuario,
+        "es_admin": es_admin,
+        "es_supervisor": es_supervisor,
     })
 
 def crear_grupos():
@@ -477,6 +483,280 @@ def editar_usuario_empleado(request, empleado_id):
             messages.error(request, "Este empleado no tiene un usuario asignado.")
 
     return redirect('lista_empleados')
+
+#OBRAS
+
+@login_required
+def listado_obras(request):
+    query = request.GET.get('q', '')
+
+    obras = Obra.objects.all()
+
+    if query:
+        obras = obras.filter(
+            Q(clave_obra__icontains=query) |
+            Q(nombre__icontains=query) |
+            Q(cliente__nombre__icontains=query)
+        )
+
+    return render(request, 'gestion/listado_obras.html', {
+        'obras': obras,
+        'query': query,
+    })
+
+
+@login_required
+# Ver obras de un cliente
+def ver_obras(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    obras = cliente.obras.all()
+    return render(request, 'gestion/ver_obras.html', {'cliente': cliente, 'obras': obras})
+
+# Agregar una nueva obra
+@login_required
+def agregar_obra(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+
+    def construir_localizacion(cliente):
+        partes = []
+        if cliente.calle:
+            partes.append(cliente.calle)
+        if cliente.numero_exterior:
+            partes.append(f"#{cliente.numero_exterior}")
+        if cliente.numero_interior:
+            partes.append(f"INT. {cliente.numero_interior}")
+        if cliente.colonia:
+            partes.append(f"Col. {cliente.colonia}")
+        if hasattr(cliente, 'codigo_postal') and cliente.codigo_postal:
+            partes.append(f"CP {cliente.codigo_postal}")
+        if cliente.ciudad:
+            partes.append(cliente.ciudad)
+        return ', '.join(partes)
+
+    if request.method == 'POST':
+        form = ObraForm(request.POST)
+        if form.is_valid():
+            obra = form.save(commit=False)
+            obra.cliente = cliente
+            obra.localizacion = construir_localizacion(cliente)
+            obra.save()
+            messages.success(request, "Obra guardada correctamente.")
+            return redirect('ver_obras', cliente_id=cliente.id)
+    else:
+        # 👇 Establecer localización inicial al mostrar el formulario
+        form = ObraForm(initial={
+            'localizacion': construir_localizacion(cliente)
+        })
+
+    return render(request, 'gestion/agregar_obra.html', {
+        'form': form,
+        'cliente': cliente
+    })
+
+
+
+@login_required
+def modificar_obra(request, obra_id):
+    obra = get_object_or_404(Obra, id=obra_id)
+    cliente = obra.cliente  # Para mostrar el nombre del cliente y redireccionar correctamente
+
+    if request.method == 'POST':
+        form = ObraForm(request.POST, instance=obra)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Obra modificada correctamente.")
+            return redirect('ver_obras', cliente_id=cliente.id)
+    else:
+        form = ObraForm(instance=obra)
+
+    return render(request, 'gestion/modificar_obra.html', {'form': form, 'cliente': cliente})
+
+@login_required
+def eliminar_obra(request, obra_id):
+    obra = get_object_or_404(Obra, id=obra_id)
+    cliente_id = obra.cliente.id
+    obra.delete()
+    messages.success(request, "Obra eliminada correctamente.")
+    return redirect('ver_obras', cliente_id=cliente_id)
+
+#SERVICIOS DE OBRA
+
+def agregar_servicio(request, obra_id):
+    obra = get_object_or_404(Obra, id=obra_id)
+    trabajos = TrabajoRealizado.objects.all()
+
+    if request.method == 'POST':
+        post_data = request.POST.copy()
+        trabajo_seleccionado = post_data.get('trabajo_realizado', '')
+
+        if trabajo_seleccionado.startswith("nuevo_"):
+            nombre_trabajo = trabajo_seleccionado.replace("nuevo_", "")
+            trabajo_obj, created = TrabajoRealizado.objects.get_or_create(nombre=nombre_trabajo)
+            post_data['trabajo_realizado'] = str(trabajo_obj.id)
+
+        form = ServicioForm(post_data, request.FILES)
+        form.fields['trabajo_realizado'].queryset = TrabajoRealizado.objects.all()
+
+        if form.is_valid():
+            servicio = form.save(commit=False)
+            servicio.obra = obra
+            servicio.clave_cliente = obra.cliente.clave
+            servicio.localizacion = obra.localizacion
+
+            # Asignar el empleado seleccionado en el formulario
+            empleado_seleccionado = form.cleaned_data.get('empleado_asignado')
+            if empleado_seleccionado:
+                servicio.empleado_asignado = empleado_seleccionado
+
+            servicio.save()
+
+            # Guardar firmas desde base64
+            def guardar_firma(campo_name, input_name):
+                data = request.POST.get(input_name)
+                if data and "base64," in data:
+                    try:
+                        formato, imgstr = data.split(';base64,')
+                        ext = formato.split('/')[-1]
+                        archivo = ContentFile(base64.b64decode(imgstr), name=f"{uuid.uuid4()}.{ext}")
+                        setattr(servicio, campo_name, archivo)
+                    except Exception as e:
+                        print(f"[ERROR] No se pudo guardar {campo_name}: {e}")
+
+            guardar_firma('superviso_firma', 'firma_superviso_data')
+            guardar_firma('capturo_firma', 'firma_capturo_data')
+            guardar_firma('facturo_firma', 'firma_facturo_data')
+            guardar_firma('autorizo_firma', 'firma_autorizo_data')
+            guardar_firma('vobo_cliente_firma', 'firma_vobo_cliente_data')
+            guardar_firma('lab_firma', 'firma_lab_data')
+
+            servicio.save()
+            return redirect('detalle_servicio', servicio_id=servicio.id)
+    else:
+        form = ServicioForm()
+        if 'empleado_asignado' in form.fields:
+            form.fields['empleado_asignado'].queryset = User.objects.filter(groups__name='Empleado')
+
+    return render(request, 'gestion/agregar_servicio.html', {
+        'form': form,
+        'obra': obra,
+        'cliente': obra.cliente,
+        'trabajos': trabajos
+    })
+
+@login_required
+def servicios_empleado(request):
+    servicios = Servicio.objects.filter(empleado_asignado=request.user)
+    return render(request, "gestion/servicios_empleado.html", {
+        "servicios": servicios
+    })
+
+@login_required
+def ver_servicios(request, obra_id):
+    obra = get_object_or_404(Obra, id=obra_id)
+    servicios = obra.servicios.all()
+    return render(request, 'gestion/ver_servicios.html', {
+        'obra': obra,
+        'servicios': servicios
+    })
+
+@login_required
+def lista_servicios(request):
+    user = request.user
+    if user.groups.filter(name="Empleado").exists():
+        # Solo los servicios asignados al empleado
+        servicios = Servicio.objects.filter(empleado_asignado=user)
+    elif user.groups.filter(name="Supervisor").exists():
+        # Todos los servicios para supervisores
+        servicios = Servicio.objects.all()
+    else:
+        # Administrador
+        servicios = Servicio.objects.all()
+
+    return render(request, "gestion/lista_servicios.html", {"servicios": servicios})
+
+@login_required
+def detalle_servicio(request, servicio_id):
+    servicio = get_object_or_404(Servicio, id=servicio_id)
+    return render(request, "gestion/detalle_servicio.html", {
+        "servicio": servicio
+    })
+
+@login_required
+def modificar_servicio(request, servicio_id):
+    servicio = get_object_or_404(Servicio, id=servicio_id)
+    trabajos = TrabajoRealizado.objects.all()
+
+    if request.method == "POST":
+        post_data = request.POST.copy()
+        trabajo_seleccionado = post_data.get('trabajo_realizado', '')
+
+        if trabajo_seleccionado.startswith("nuevo_"):
+            nombre_trabajo = trabajo_seleccionado.replace("nuevo_", "")
+            trabajo_obj, created = TrabajoRealizado.objects.get_or_create(nombre=nombre_trabajo)
+            post_data['trabajo_realizado'] = str(trabajo_obj.id)
+
+        form = ServicioForm(post_data, request.FILES, instance=servicio)
+        form.fields['trabajo_realizado'].queryset = TrabajoRealizado.objects.all()  # importante
+
+        if form.is_valid():
+            servicio = form.save(commit=False)
+
+            if request.user.groups.filter(name="Empleado").exists():
+                servicio.empleado_asignado = request.user
+
+            # Guardar firmas desde base64
+            def guardar_firma(servicio_obj, data, campo_name):
+                if data and "base64," in data:
+                    try:
+                        formato, imgstr = data.split(';base64,')
+                        ext = formato.split('/')[-1]
+                        archivo = ContentFile(base64.b64decode(imgstr), name=f"{uuid.uuid4()}.{ext}")
+                        setattr(servicio_obj, campo_name, archivo)
+                    except Exception as e:
+                        print(f"[ERROR] No se pudo guardar {campo_name}: {e}")
+
+            guardar_firma(servicio, post_data.get('firma_superviso_data'), 'superviso_firma')
+            guardar_firma(servicio, post_data.get('firma_capturo_data'), 'capturo_firma')
+            guardar_firma(servicio, post_data.get('firma_facturo_data'), 'facturo_firma')
+            guardar_firma(servicio, post_data.get('firma_autorizo_data'), 'autorizo_firma')
+            guardar_firma(servicio, post_data.get('firma_vobo_cliente_data'), 'vobo_cliente_firma')
+            guardar_firma(servicio, post_data.get('firma_lab_data'), 'lab_firma')
+
+            servicio.save()
+            return redirect("detalle_servicio", servicio_id=servicio.id)
+    else:
+        form = ServicioForm(instance=servicio)
+
+    return render(request, "gestion/modificar_servicio.html", {
+        "form": form,
+        "servicio": servicio,
+        "trabajos": trabajos
+    })
+
+def guardar_firma(servicio, data_url, campo_modelo):
+    if not data_url or not data_url.startswith("data:image"):
+        return  # No reemplazar si no llega nada
+
+    header, base64data = data_url.split(";base64,")
+    ext = header.split("/")[-1]
+    try:
+        decoded = base64.b64decode(base64data)
+    except Exception:
+        return
+
+    filename = f"{campo_modelo}_{servicio.id}.{ext}"
+    imagen = ContentFile(decoded, name=filename)
+    setattr(servicio, campo_modelo, imagen)
+
+
+@login_required
+@require_POST
+def eliminar_servicio(request, servicio_id):
+    servicio = get_object_or_404(Servicio, id=servicio_id)
+    obra_id = servicio.obra.id
+    servicio.delete()
+    messages.success(request, "Servicio eliminado correctamente.")
+    return redirect('ver_servicios', obra_id=obra_id)
 
 
 

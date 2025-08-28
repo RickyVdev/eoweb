@@ -74,8 +74,9 @@
     <div class="col-md-6">
       <label for="rol">Rol</label>
       <select name="rol" class="form-select">
-        <option value="Administrador" {% if "Administrador" in empleado_grupo %}selected{% endif %}>Administrador</option>
-        <option value="Empleado" {% if "Empleado" in empleado_grupo %}selected{% endif %}>Empleado</option>
+          <option value="Administrador" {% if "Administrador" in empleado_grupo %}selected{% endif %}>Administrador</option>
+          <option value="Empleado" {% if "Empleado" in empleado_grupo %}selected{% endif %}>Empleado</option>
+          <option value="Supervisor" {% if "Supervisor" in empleado_grupo %}selected{% endif %}>Supervisor</option>
       </select>
     </div>
 

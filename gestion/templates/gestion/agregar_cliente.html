@@ -24,8 +24,11 @@
         <div class="col-md-3">
             {{ form.numero_interior.label_tag }} {{ form.numero_interior }}
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             {{ form.colonia.label_tag }} {{ form.colonia }}
+        </div>
+        <div class="col-md-2">
+            {{ form.codigo_postal.label_tag }} {{ form.codigo_postal }}
         </div>
         <div class="col-md-6">
             {{ form.ciudad.label_tag }} {{ form.ciudad }}
@@ -92,7 +95,7 @@
   });
 
   // Validar solo números en campos específicos
-        const soloNumeros = ['id_numero_exterior', 'id_numero_interior', 'id_telefono', 'id_telefono2', 'id_movil', 'id_extension'];
+        const soloNumeros = ['id_numero_exterior', 'id_numero_interior', 'id_telefono', 'id_telefono2', 'id_movil', 'id_extension', 'id_codigo_postal'];
         soloNumeros.forEach(id => {
             const input = document.getElementById(id);
             if (input) {

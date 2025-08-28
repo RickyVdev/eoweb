@@ -1,0 +1,44 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Ver Obras{% endblock %}
+
+{% block content %}
+<h2>Obras del cliente: {{ cliente.nombre }}</h2>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID Obra</th>
+            <th>Nombre</th>
+            <th>Atención a</th>
+            <th>Localización</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obra in obras %}
+        <tr>
+            <td>{{ obra.clave_obra }}</td>
+            <td>{{ obra.nombre }}</td>
+            <td>{{ obra.atencion_a }}</td>
+            <td>{{ obra.localizacion }}</td>
+            <td>
+                <a href="{% url 'modificar_obra' obra.id %}" class="btn btn-sm btn-warning">Modificar</a>
+                <a href="{% url 'agregar_servicio' obra.id %}" class="btn btn-sm btn-primary">Agregar Servicio</a>
+                <a href="{% url 'ver_servicios' obra.id %}" class="btn btn-sm btn-info">Ver Servicios</a>
+                <a href="{% url 'eliminar_obra' obra.id %}" class="btn btn-sm btn-danger"
+                onclick="return confirm('¿Estás seguro de que deseas eliminar esta obra?')">Eliminar</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5">No hay obras registradas para este cliente.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'ver_cliente' cliente.id %}" class="btn btn-secondary mt-2">Volver al Cliente</a>
+<a href="{% url 'listado_obras' %}" class="btn btn-secondary mt-2">Ir a Obras</a>
+
+{% endblock %}

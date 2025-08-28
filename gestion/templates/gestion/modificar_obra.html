@@ -1,0 +1,79 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Modificar Obra{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Modificar Obra</h2>
+    <form method="post" class="row g-3">
+        {% csrf_token %}
+
+        <div class="form-row row">
+        <div class="col-md-2">
+            {{ form.clave_obra.label_tag }}
+            {{ form.clave_obra }}
+        </div>
+        <div class="col-md-6">
+            {{ form.nombre.label_tag }}
+            {{ form.nombre }}
+        </div>
+        <div class="col-md-5">
+            {{ form.atencion_a.label_tag }}
+            {{ form.atencion_a }}
+        </div>
+        <div class="col-md-5">
+            {{ form.localizacion.label_tag }}
+            {{ form.localizacion }}
+        </div>
+    </div>
+
+        <div class="col-12 mt-4">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Guardar cambios
+            </button>
+            <a href="{% url 'ver_obras' cliente.id %}" class="btn btn-danger">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+{% if form.errors %}
+    <div class="alert alert-danger mt-3">
+        <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+<script>
+    // Convertir texto a mayúsculas
+    document.addEventListener('DOMContentLoaded', function() {
+        const inputs = document.querySelectorAll('input[type="text"]:not([name="email"])');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+
+    // Validar solo números en campos específicos
+        const soloNumeros = ['id_numero_exterior', 'id_numero_interior', 'id_telefono', 'id_telefono2', 'id_movil', 'id_extension'];
+        soloNumeros.forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

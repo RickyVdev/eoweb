@@ -27,7 +27,7 @@ if 'collectstatic' in sys.argv:
 # ======================
 # CONFIGURACIÓN LOCAL
 # ======================
-'''
+
 SECRET_KEY = '6!dbs_rb*b89tmkb8qpd5oc27i#73pdbu379y-0mr5evoqm4y_'
 DEBUG = True
 DATABASES = {
@@ -35,14 +35,14 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}'''
+}
 
 
 
 # ======================
 # CONFIGURACIÓN PRODUCCIÓN (RAILWAY)
 # ======================
-
+'''
 SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
     raise Exception("SECRET_KEY no definida. Agrega una variable de entorno 'SECRET_KEY'.")#DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -57,7 +57,7 @@ DATABASES = {
 }
 if 'DATABASE_URL' in os.environ:
     DATABASES['default'] = dj_database_url.parse(os.environ['DATABASE_URL'], conn_max_age=600)
-
+'''
 
 
 ALLOWED_HOSTS = ['eoweb.up.railway.app', 'localhost', '127.0.0.1']

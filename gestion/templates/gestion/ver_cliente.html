@@ -17,6 +17,7 @@
                 <div class="col-md-4"><strong>Número Exterior:</strong> {{ cliente.numero_exterior }}</div>
                 <div class="col-md-4"><strong>Número Interior:</strong> {{ cliente.numero_interior }}</div>
                 <div class="col-md-4"><strong>Colonia:</strong> {{ cliente.colonia }}</div>
+                <div class="col-md-4"><strong>Código Postal:</strong> {{ cliente.codigo_postal }}</div>
                 <div class="col-md-4"><strong>Ciudad:</strong> {{ cliente.ciudad }}</div>
                 <div class="col-md-4"><strong>Teléfono:</strong> {{ cliente.telefono }}</div>
                 <div class="col-md-4"><strong>Extensión:</strong> {{ cliente.extension }}</div>
@@ -26,6 +27,12 @@
                 <!--<div class="col-md-4"><strong>Obra:</strong> {{ cliente.obra }}</div>
                 <div class="col-md-4"><strong>Localización:</strong> {{ cliente.localizacion }}</div>-->
                 <div class="col-md-4"><strong>Correo:</strong> {{ cliente.correo }}</div>
+                <hr>
+                    <h4>Obras asociadas</h4>
+
+                    <a href="{% url 'ver_obras' cliente.id %}" class="btn btn-outline-primary">Ver Obras</a>
+                    <a href="{% url 'agregar_obra' cliente.id %}" class="btn btn-success">Agregar Obra</a>
+
             </div>
         </div>
         <div class="card-footer text-end">

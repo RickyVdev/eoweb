@@ -19,6 +19,7 @@
             <option value="">Todos</option>
             <option value="Administrador" {% if request.GET.rol == "Administrador" %}selected{% endif %}>Administrador</option>
             <option value="Empleado" {% if request.GET.rol == "Empleado" %}selected{% endif %}>Empleado</option>
+            <option value="Supervisor" {% if request.GET.rol == "Supervisor" %}selected{% endif %}>Supervisor</option>
         </select>
         <button type="submit">Filtrar</button>
     </form>

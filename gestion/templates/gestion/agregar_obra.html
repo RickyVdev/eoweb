@@ -1,0 +1,39 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Agregar Obra{% endblock %}
+
+{% block content %}
+<h2>Agregar Obra para {{ cliente.nombre }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="form-row row">
+        <div class="col-md-2">
+            {{ form.clave_obra.label_tag }}
+            {{ form.clave_obra }}
+        </div>
+        <div class="col-md-6">
+            {{ form.nombre.label_tag }}
+            {{ form.nombre }}
+        </div>
+        <div class="col-md-5">
+            {{ form.atencion_a.label_tag }}
+            {{ form.atencion_a }}
+        </div>
+        <div class="col-md-5">
+            {{ form.localizacion.label_tag }}
+            {{ form.localizacion }}
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Guardar Obra</button>
+</form>
+
+<a href="{% url 'ver_cliente' cliente.id %}" class="btn btn-secondary mt-2">Volver al Cliente</a>
+<a href="{% url 'ver_obras' cliente.id %}" class="btn btn-secondary mt-2">Ver Obras</a>
+{% endblock %}
+
+
+

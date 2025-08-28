@@ -34,11 +34,24 @@ urlpatterns = [
     path('empleados/documento/<int:documento_id>/eliminar/', views.eliminar_documento_empleado, name='eliminar_documento_empleado'),
     path('clientes/<int:cliente_id>/eliminar_cfdi/', views.eliminar_cfdi_cliente, name='eliminar_cfdi_cliente'),
     path('ajax/obtener-id-empleado/', views.obtener_id_empleado_ajax, name='obtener_id_empleado_ajax'),
-
-]
+    path('clientes/<int:cliente_id>/obras/', views.ver_obras, name='ver_obras'),
+    path('clientes/<int:cliente_id>/agregar/', views.agregar_obra, name='agregar_obra'),
+    path('obras/<int:obra_id>/modificar/', views.modificar_obra, name='modificar_obra'),
+    path('obras/eliminar/<int:obra_id>/', views.eliminar_obra, name='eliminar_obra'),
+    path('obras/<int:obra_id>/servicios/', views.ver_servicios, name='ver_servicios'),
+    path('obras/<int:obra_id>/agregar/', views.agregar_servicio, name='agregar_servicio'),
+    path('servicios/detalle/<int:servicio_id>/', views.detalle_servicio, name='detalle_servicio'),
+    path('servicios/modificar/<int:servicio_id>/', views.modificar_servicio, name='modificar_servicio'),
+    path('servicios/eliminar/<int:servicio_id>/', views.eliminar_servicio, name='eliminar_servicio'),
+    path('obras/', views.listado_obras, name='listado_obras'),
+    path('servicios/', views.lista_servicios, name='lista_servicios'),
+    
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+

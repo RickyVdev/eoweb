@@ -45,12 +45,18 @@ def inicio(request):
     es_superusuario = usuario.is_superuser
     es_admin = usuario.groups.filter(name="Administrador").exists()
     es_supervisor = usuario.groups.filter(name="Supervisor").exists()
+    es_empleado = request.user.groups.filter(name="Empleado").exists()
+    servicios = None
+    if es_empleado:
+        servicios = Servicio.objects.filter(empleado_asignado=request.user)
     # Los empleados normales no necesitan flag especial; se asume por exclusión
 
     return render(request, "gestion/inicio.html", {
         "es_superusuario": es_superusuario,
         "es_admin": es_admin,
         "es_supervisor": es_supervisor,
+        "servicios": servicios,
+        "es_empleado": es_empleado,
     })
 
 def crear_grupos():
@@ -636,6 +642,7 @@ def agregar_servicio(request, obra_id):
         if 'empleado_asignado' in form.fields:
             form.fields['empleado_asignado'].queryset = User.objects.filter(groups__name='Empleado')
 
+
     return render(request, 'gestion/agregar_servicio.html', {
         'form': form,
         'obra': obra,
@@ -644,11 +651,19 @@ def agregar_servicio(request, obra_id):
     })
 
 @login_required
-def servicios_empleado(request):
-    servicios = Servicio.objects.filter(empleado_asignado=request.user)
-    return render(request, "gestion/servicios_empleado.html", {
-        "servicios": servicios
+def perfil_empleado(request):
+    empleado = get_object_or_404(Empleado, user=request.user)
+    servicios = empleado.servicios_asignados.all()
+    return render(request, 'perfil_empleado.html', {
+        'empleado': empleado,
+        'servicios': servicios
     })
+
+@login_required
+def mis_servicios(request):
+    usuario = request.user
+    servicios = usuario.servicios_asignados.all()  # gracias al related_name
+    return render(request, "gestion/mis_servicios.html", {"servicios": servicios})
 
 @login_required
 def ver_servicios(request, obra_id):

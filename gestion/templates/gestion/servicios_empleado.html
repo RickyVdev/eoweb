@@ -1,9 +1,0 @@
-<h3>Servicios asignados al usuario: {{ request.user.username }}</h3>
-
-{% for s in servicios %}
-    <div>
-        Servicio: {{ s.trabajo_realizado }} - Empleado asignado: {{ s.empleado_asignado }}
-    </div>
-{% empty %}
-    <p>No hay servicios asignados.</p>
-{% endfor %}

@@ -122,12 +122,12 @@ class ServicioForm(forms.ModelForm):
         fields = [
             'fecha', 'otvm', 'llegada', 'termino',
             'solicitante', 'preguntar_por', 'trabajo_realizado', 'cantidad', 'observaciones',
-            'empleado_asignado',
             'vobo_cliente_nombre', 'lab_nombre',
             'superviso_nombre', 'superviso_fecha',
             'capturo_nombre', 'capturo_fecha',
             'facturo_nombre', 'factura_numero', 'facturo_fecha',
             'autorizo_nombre', 'autorizo_fecha',
+            'empleado_asignado',
         ]
         widgets = {
             'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),

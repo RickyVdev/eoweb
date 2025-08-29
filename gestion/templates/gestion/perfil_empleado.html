@@ -1,0 +1,15 @@
+<h2>Perfil de {{ empleado.username }}</h2>
+
+<h3>Servicios asignados:</h3>
+{% if servicios_asignados %}
+    <ul>
+    {% for servicio in servicios_asignados %}
+        <li>
+            {{ servicio.nombre }} - {{ servicio.descripcion }} 
+            (Cliente: {{ servicio.cliente.nombre }})
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay servicios asignados.</p>
+{% endif %}

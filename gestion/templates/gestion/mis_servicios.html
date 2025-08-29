@@ -1,0 +1,47 @@
+{% extends "gestion/base.html" %}
+{% load static %}
+
+{% block title %}Mis Servicios{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Mis Servicios Asignados</h2>
+
+    {% if servicios %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">O.T.V.M.</th>
+                    <th scope="col">Obra</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Llegada</th>
+                    <th scope="col">Término</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for servicio in servicios %}
+                <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
+                    <td>{{ servicio.otvm }}</td>
+                    <td>{{ servicio.obra.nombre }}</td>
+                    <td>{{ servicio.fecha }}</td>
+                    <td>{{ servicio.llegada }}</td>
+                    <td>{{ servicio.termino }}</td>
+                    <td>
+                        <a href="{% url 'detalle_servicio' servicio.id %}" class="btn btn-sm btn-primary">Ver detalle</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        No tienes servicios asignados.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

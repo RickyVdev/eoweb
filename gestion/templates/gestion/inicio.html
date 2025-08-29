@@ -45,4 +45,39 @@
 </a>
 {% endif %}
 
+{% if es_empleado %}
+    <h2 class="mt-4 mb-3">Mis Servicios Asignados</h2>
+
+    {% if servicios %}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for servicio in servicios %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <!-- Encabezado oscuro con O.T.V.M -->
+                    <div class="card-header bg-dark text-white">
+                        <p></p><strong> O.T.V.M: {{ servicio.otvm }} </strong></p>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text"><strong>Cliente:</strong> {{ servicio.obra.cliente.nombre }}</p>
+                        <p class="card-text"><strong>Obra:</strong> {{ servicio.obra.nombre }}</p>
+                        <p class="card-text"><strong>Fecha:</strong> {{ servicio.fecha }}</p>
+                        <p class="card-text"><strong>Llegada:</strong> {{ servicio.llegada }}</p>
+                        <p class="card-text"><strong>Término:</strong> {{ servicio.termino }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent border-top-0">
+                        <a href="{% url 'detalle_servicio' servicio.id %}" class="btn btn-primary btn-lg w-100">
+                            Ver detalle
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-2" role="alert">
+            No tienes servicios asignados.
+        </div>
+    {% endif %}
+{% endif %}
+
 {% endblock %}

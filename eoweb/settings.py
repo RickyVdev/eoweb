@@ -47,7 +47,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 if not SECRET_KEY:
     raise Exception("SECRET_KEY no definida. Agrega una variable de entorno 'SECRET_KEY'.")#DEBUG = os.getenv('DEBUG', 'False') == 'True'
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
-DEBUG = False
+DEBUG = True
 
 DATABASES = {
     'default': {

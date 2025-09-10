@@ -107,7 +107,7 @@ class ObraForm(forms.ModelForm):
             'clave_obra': forms.TextInput(attrs={'class': 'form-control'}),
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'atencion_a': forms.TextInput(attrs={'class': 'form-control'}),
-            'localizacion': forms.TextInput(attrs={'class': 'form-control', 'readonly': 'readonly'}),
+            'localizacion': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
 class ServicioForm(forms.ModelForm):

@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             """
             CREATE TABLE IF NOT EXISTS gestion_servicio (
-                id INTEGER PRIMARY KEY AUTOINCREMENT
+                id SERIAL PRIMARY KEY
             );
             CREATE TABLE IF NOT EXISTS gestion_trabajorealizado (
                 id INTEGER PRIMARY KEY AUTOINCREMENT

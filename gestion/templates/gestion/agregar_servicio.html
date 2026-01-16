@@ -11,19 +11,36 @@
   <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
     {% csrf_token %}
 
-    <div class="row">
+    <div class="row align-items-end">
       <div class="col-md-4 mb-3">
         {{ form.fecha.label_tag }} {{ form.fecha }}
       </div>
       <div class="col-md-2 mb-3">
-        {{ form.otvm.label_tag }} {{ form.otvm }}
+        <label class="form-label" for="otvm_display">OTVM</label>
+        <input
+          type="text"
+          id="otvm_display"
+          class="form-control"
+          value="{{ otvm }}"
+          readonly
+        >
       </div>
       <div class="col-md-6 mb-3">
         <label for="localizacion">Localización</label>
         <input type="text" class="form-control" id="localizacion" value="{{ obra.localizacion }}" readonly>
       </div>
       <div class="col-md-3 mb-3">
-        {{ form.llegada.label_tag }} {{ form.llegada }}
+        {{ form.llegada.label_tag }}
+        <div class="input-group">
+          {{ form.llegada }}
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            id="btn-hora-actual"
+          >
+            Hora actual
+          </button>
+        </div>
       </div>
       <div class="col-md-3 mb-3">
         {{ form.termino.label_tag }} {{ form.termino }}
@@ -40,7 +57,7 @@
       </div>
 
       <div class="col-md-6 mb-3">
-        <label for="trabajo_realizado">Trabajo Realizado</label>
+        <label for="trabajo_realizado">Trabajo Programado</label>
         <div class="input-group">
           <select id="trabajo_realizado" name="trabajo_realizado" class="form-select">
             {% for trabajo in trabajos %}
@@ -86,7 +103,7 @@
         <label>Firma VoBo Cliente</label><br>
         <canvas id="canvas_vobo_cliente" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" name="firma_vobo_cliente_data" id="firma_vobo_cliente_data">
-        <button type="button" onclick="guardarFirma('canvas_vobo_cliente', 'firma_vobo_cliente_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_vobo_cliente', 'firma_vobo_cliente_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas_canvas_vobo_cliente()">Borrar</button>
       </div>
     </div>
@@ -100,7 +117,7 @@
         <label>Firma Por el Lab</label><br>
         <canvas id="canvas_lab" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" name="firma_lab_data" id="firma_lab_data">
-        <button type="button" onclick="guardarFirma('canvas_lab', 'firma_lab_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_lab', 'firma_lab_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas_canvas_lab()">Borrar</button>
       </div>
     </div>
@@ -111,7 +128,8 @@
     <h5>Supervisó</h5>
     <div class="row">
       <div class="col-md-6 mb-3">
-        {{ form.superviso_nombre.label_tag }} {{ form.superviso_nombre }}
+        {{ form.superviso_usuario.label_tag }}
+        {{ form.superviso_usuario }}
       </div>
       <div class="col-md-6 mb-3">
         {{ form.superviso_fecha.label_tag }} {{ form.superviso_fecha }}
@@ -120,7 +138,7 @@
         <label>Iniciales y Firma Supervisó</label><br>
         <canvas id="canvas_superviso" width="300" height="150" style="border:1px solid #000;"></canvas>
         <input type="hidden" name="firma_superviso_data" id="firma_superviso_data">
-        <button type="button" onclick="guardarFirma('canvas_superviso', 'firma_superviso_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_superviso', 'firma_superviso_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas_canvas_superviso()">Borrar</button>
       </div>
     </div>
@@ -138,7 +156,7 @@
         <label>Iniciales y Firma Capturó</label><br>
         <canvas id="canvas_capturo" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" id="firma_capturo_data" name="firma_capturo_data">
-        <button type="button" onclick="guardarFirma('canvas_capturo', 'firma_capturo_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_capturo', 'firma_capturo_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas_canvas_capturo()">Borrar</button>
       </div>
     </div>
@@ -159,7 +177,7 @@
         <label>Iniciales y Firma Facturó</label><br>
         <canvas id="canvas_facturo" width="250" height="100" style="border:1px solid #000;"></canvas><br>
         <input type="hidden" name="firma_facturo_data" id="firma_facturo_data">
-        <button type="button" onclick="guardarFirma('canvas_facturo', 'firma_facturo_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_facturo', 'firma_facturo_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas_canvas_facturo()">Borrar</button>
       </div>
     </div>
@@ -177,7 +195,7 @@
         <label>Iniciales y Firma Autorizó</label><br>
         <canvas id="canvas_autorizo" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" id="firma_autorizo_data" name="firma_autorizo_data">
-        <button type="button" onclick="guardarFirma('canvas_autorizo', 'firma_autorizo_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_autorizo', 'firma_autorizo_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas_canvas_autorizo()">Borrar</button>
       </div>
     </div>
@@ -356,6 +374,43 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Lab:", document.getElementById("firma_lab_data").value.substring(0,50));
   });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const empleadoSelect = document.getElementById("empleado_asignado");
+  const labNombreInput = document.getElementById("id_lab_nombre");
+
+  if (!empleadoSelect || !labNombreInput) return;
+
+  empleadoSelect.addEventListener("change", function () {
+    const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
+
+    if (selectedOption && selectedOption.value) {
+      labNombreInput.value = selectedOption.text.trim();
+    } else {
+      labNombreInput.value = "";
+    }
+  });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const llegadaInput = document.getElementById("id_llegada");
+  const btnHora = document.getElementById("btn-hora-actual");
+
+  if (!llegadaInput || !btnHora) return;
+
+  btnHora.addEventListener("click", function () {
+    const now = new Date();
+    const hora =
+      String(now.getHours()).padStart(2, "0") +
+      ":" +
+      String(now.getMinutes()).padStart(2, "0");
+
+    llegadaInput.value = hora;
+    llegadaInput.readOnly = true;
+    btnHora.disabled = true;
+  });
+});
+
 </script>
 
 

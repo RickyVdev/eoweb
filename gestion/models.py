@@ -4,7 +4,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
-
+from django.db.models import Max
 
 # Create your models here.
 class Cliente(models.Model):
@@ -86,7 +86,7 @@ class TrabajoRealizado(models.Model):
 class Servicio(models.Model):
     obra = models.ForeignKey(Obra, on_delete=models.CASCADE, related_name='servicios')
     fecha = models.DateField()
-    otvm = models.CharField("O.T.V.M.", max_length=20)
+    otvm = models.PositiveIntegerField("O.T.V.M.",editable=False)
 
     llegada = models.TimeField("Llegada a las")
     termino = models.TimeField("Término de los trabajos a las")
@@ -94,7 +94,7 @@ class Servicio(models.Model):
     solicitante = models.CharField("Solicitó el servicio", max_length=100)
     preguntar_por = models.CharField("Preguntar por", max_length=100)
     
-    trabajo_realizado = models.ForeignKey(TrabajoRealizado, on_delete=models.SET_NULL, null=True)
+    trabajo_realizado = models.ForeignKey(TrabajoRealizado, on_delete=models.SET_NULL, null=True,verbose_name="Trabajo programado")
     cantidad = models.IntegerField()
     observaciones = models.TextField(blank=True)
 
@@ -111,7 +111,7 @@ class Servicio(models.Model):
     lab_firma = models.ImageField(upload_to="firmas/", blank=True, null=True)
 
     # Supervisó, Capturó, Facturó, Autorizó
-    superviso_nombre = models.CharField(max_length=100)
+    superviso_nombre = models.CharField(max_length=100, blank=True, null=True)
     superviso_firma = models.ImageField(upload_to='firmas/', null=True, blank=True)
     superviso_fecha = models.DateField()
 
@@ -135,6 +135,14 @@ class Servicio(models.Model):
         blank=True, 
         related_name='servicios_asignados'
     )
+    def save(self, *args, **kwargs):
+        if not self.otvm:
+            ultimo = Servicio.objects.aggregate(
+                max_otvm=Max('otvm')
+            )['max_otvm']
+            self.otvm = (ultimo or 0) + 1
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Servicio {self.otvm} - {self.obra.nombre} - {self.fecha}"

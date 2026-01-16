@@ -591,6 +591,9 @@ def agregar_servicio(request, obra_id):
     obra = get_object_or_404(Obra, id=obra_id)
     trabajos = TrabajoRealizado.objects.all()
 
+    ultimo_servicio = Servicio.objects.order_by('-otvm').first()
+    siguiente_otvm = (ultimo_servicio.otvm + 1) if ultimo_servicio else 1
+
     if request.method == 'POST':
         post_data = request.POST.copy()
         trabajo_seleccionado = post_data.get('trabajo_realizado', '')
@@ -605,6 +608,7 @@ def agregar_servicio(request, obra_id):
 
         if form.is_valid():
             servicio = form.save(commit=False)
+            servicio.otvm = siguiente_otvm
             servicio.obra = obra
             servicio.clave_cliente = obra.cliente.clave
             servicio.localizacion = obra.localizacion
@@ -613,6 +617,10 @@ def agregar_servicio(request, obra_id):
             empleado_seleccionado = form.cleaned_data.get('empleado_asignado')
             if empleado_seleccionado:
                 servicio.empleado_asignado = empleado_seleccionado
+
+            supervisor = form.cleaned_data.get('superviso_usuario')
+            if supervisor:
+                servicio.superviso_nombre = supervisor.get_full_name() or supervisor.username
 
             servicio.save()
 
@@ -647,7 +655,8 @@ def agregar_servicio(request, obra_id):
         'form': form,
         'obra': obra,
         'cliente': obra.cliente,
-        'trabajos': trabajos
+        'trabajos': trabajos,
+        'otvm': siguiente_otvm,
     })
 
 @login_required
@@ -715,6 +724,14 @@ def modificar_servicio(request, servicio_id):
 
         if form.is_valid():
             servicio = form.save(commit=False)
+            if servicio.pk:
+                llegada_original = Servicio.objects.get(pk=servicio.pk).llegada
+                servicio.llegada = llegada_original
+            supervisor = form.cleaned_data.get('supervisor_usuario')
+            if supervisor:
+                servicio.superviso_nombre = supervisor.username
+
+            servicio.save()
 
             if request.user.groups.filter(name="Empleado").exists():
                 servicio.empleado_asignado = request.user

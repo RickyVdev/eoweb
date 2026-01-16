@@ -11,12 +11,16 @@
   <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
     {% csrf_token %}
 
-    <div class="row">
+    <div class="row align-items-end">
       <div class="col-md-4 mb-3">
         {{ form.fecha.label_tag }} {{ form.fecha }}
       </div>
       <div class="col-md-2 mb-3">
-        {{ form.otvm.label_tag }} {{ form.otvm }}
+        <label>OTVM</label>
+        <input type="text"
+              class="form-control"
+              value="{{ form.instance.otvm }}"
+              readonly>
       </div>
       <div class="col-md-6 mb-3">
         <label for="localizacion">Localización</label>
@@ -40,7 +44,7 @@
       </div>
 
       <div class="col-md-6 mb-3">
-        <label for="trabajo_realizado">Trabajo Realizado</label>
+        <label for="trabajo_realizado">Trabajo Programado</label>
         <div class="input-group">
           <select id="trabajo_realizado" name="trabajo_realizado" class="form-select">
             {% for trabajo in trabajos %}
@@ -92,7 +96,7 @@
         {% endif %}
         <canvas id="canvas_vobo_cliente" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" name="firma_vobo_cliente_data" id="firma_vobo_cliente_data">
-        <button type="button" onclick="guardarFirma('canvas_vobo_cliente', 'firma_vobo_cliente_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_vobo_cliente', 'firma_vobo_cliente_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas('canvas_vobo_cliente')">Borrar</button>
       </div>
     </div>
@@ -112,7 +116,7 @@
         {% endif %}
         <canvas id="canvas_lab" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" name="firma_lab_data" id="firma_lab_data">
-        <button type="button" onclick="guardarFirma('canvas_lab', 'firma_lab_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_lab', 'firma_lab_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas('canvas_lab')">Borrar</button>
       </div>
     </div>
@@ -122,7 +126,10 @@
     <!-- Supervisó -->
     <h5>Supervisó</h5>
     <div class="row">
-      <div class="col-md-6 mb-3">{{ form.superviso_nombre.label_tag }} {{ form.superviso_nombre }}</div>
+      <div class="col-md-6 mb-3">
+        {{ form.superviso_usuario.label_tag }}
+        {{ form.superviso_usuario }}
+      </div>
       <div class="col-md-6 mb-3">{{ form.superviso_fecha.label_tag }} {{ form.superviso_fecha }}</div>
       <div class="col-md-12 mb-3">
         <label>Iniciales y Firma Supervisó</label><br>
@@ -134,7 +141,7 @@
         {% endif %}
         <canvas id="canvas_superviso" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" id="firma_superviso_data" name="firma_superviso_data">
-        <button type="button" onclick="guardarFirma('canvas_superviso', 'firma_superviso_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_superviso', 'firma_superviso_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas('canvas_superviso')">Borrar</button>
       </div>
     </div>
@@ -153,7 +160,7 @@
         {% endif %}
         <canvas id="canvas_capturo" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" id="firma_capturo_data" name="firma_capturo_data">
-        <button type="button" onclick="guardarFirma('canvas_capturo', 'firma_capturo_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_capturo', 'firma_capturo_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas('canvas_capturo')">Borrar</button>
       </div>
     </div>
@@ -173,7 +180,7 @@
         {% endif %}
         <canvas id="canvas_facturo" width="250" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" id="firma_facturo_data" name="firma_facturo_data">
-        <button type="button" onclick="guardarFirma('canvas_facturo', 'firma_facturo_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_facturo', 'firma_facturo_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas('canvas_facturo')">Borrar</button>
       </div>
     </div>
@@ -192,7 +199,7 @@
         {% endif %}
         <canvas id="canvas_autorizo" width="300" height="100" style="border:1px solid #000;"></canvas>
         <input type="hidden" id="firma_autorizo_data" name="firma_autorizo_data">
-        <button type="button" onclick="guardarFirma('canvas_autorizo', 'firma_autorizo_data')">Guardar Firma</button>
+        <button type="button" onclick="guardarFirma('canvas_autorizo', 'firma_autorizo_data')">Confirmar</button>
         <button type="button" onclick="clearCanvas('canvas_autorizo')">Borrar</button>
       </div>
     </div>
@@ -372,6 +379,24 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("Lab:", document.getElementById("firma_lab_data").value.substring(0,50));
   });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const empleadoSelect = document.getElementById("empleado_asignado");
+  const labNombreInput = document.getElementById("id_lab_nombre");
+
+  if (!empleadoSelect || !labNombreInput) return;
+
+  empleadoSelect.addEventListener("change", function () {
+    const selectedOption = empleadoSelect.options[empleadoSelect.selectedIndex];
+
+    if (selectedOption && selectedOption.value) {
+      labNombreInput.value = selectedOption.text.trim();
+    } else {
+      labNombreInput.value = "";
+    }
+  });
+});
+
 </script>
 
 {% if form.errors %}
@@ -388,4 +413,16 @@ document.addEventListener('DOMContentLoaded', function() {
     </ul>
   </div>
 {% endif %}
+
+{% if form.instance.llegada %}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const llegadaInput = document.getElementById("id_llegada");
+      if (llegadaInput) {
+        llegadaInput.readOnly = true;
+      }
+    });
+  </script>
+{% endif %}
+
 {% endblock %}

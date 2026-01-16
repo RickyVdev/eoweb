@@ -68,12 +68,6 @@ class ClienteForm(forms.ModelForm):
         if dato and not dato.isdigit():
             raise forms.ValidationError("Solo se permiten números.")
         return dato
-
-    def clean_numero_interior(self):
-        dato = self.cleaned_data['numero_interior']
-        if dato and not dato.isdigit():
-            raise forms.ValidationError("Solo se permiten números.")
-        return dato
     
     def clean_telefono(self):
             telefono = self.cleaned_data.get('telefono')
@@ -117,10 +111,17 @@ class ServicioForm(forms.ModelForm):
         label="Empleado Asignado",
         widget=forms.Select(attrs={'class': 'form-select'})
     )
+
+    superviso_usuario = forms.ModelChoiceField(
+        queryset=User.objects.filter(groups__name='Supervisor'),
+        required=False,
+        label="Supervisó",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     class Meta:
         model = Servicio
         fields = [
-            'fecha', 'otvm', 'llegada', 'termino',
+            'fecha', 'llegada', 'termino',
             'solicitante', 'preguntar_por', 'trabajo_realizado', 'cantidad', 'observaciones',
             'vobo_cliente_nombre', 'lab_nombre',
             'superviso_nombre', 'superviso_fecha',
@@ -133,7 +134,7 @@ class ServicioForm(forms.ModelForm):
             'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'llegada': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
             'termino': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
-            'otvm': forms.TextInput(attrs={'class': 'form-control'}),
+            #'otvm': forms.TextInput(attrs={'class': 'form-control'}),
             'solicitante': forms.TextInput(attrs={'class': 'form-control'}),
             'preguntar_por': forms.TextInput(attrs={'class': 'form-control'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
@@ -151,9 +152,32 @@ class ServicioForm(forms.ModelForm):
             'autorizo_fecha': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date', 'class': 'form-control'}),
             'empleado_asignado': forms.Select(attrs={'class': 'form-select'}),
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+
+        supervisor = cleaned_data.get("superviso_usuario")
+
+        if supervisor:
+            cleaned_data["superviso_nombre"] = supervisor.get_username()
+
+        return cleaned_data
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['lab_nombre'].widget.attrs['readonly'] = True
+        # Supervisó: ocultar campo real
+        self.fields['superviso_nombre'].widget = forms.HiddenInput()
+        # Inicializar supervisor si existe
+        if self.instance and self.instance.superviso_nombre:
+            try:
+                self.fields['superviso_usuario'].initial = User.objects.get(
+                    username=self.instance.superviso_nombre
+                )
+            except User.DoesNotExist:
+                pass
+
         # Limitar la selección solo a usuarios con grupo "Empleado"
         if 'empleado_asignado' in self.fields:
             self.fields['empleado_asignado'].queryset = User.objects.filter(groups__name="Empleado")

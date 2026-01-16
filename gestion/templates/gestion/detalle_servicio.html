@@ -24,13 +24,42 @@
         <div class="col-md-6"><strong>Preguntar por:</strong> {{ servicio.preguntar_por }}</div>
       </div>
       <div class="row mb-2">
-        <div class="col-md-6"><strong>Trabajo realizado:</strong> {{ servicio.trabajo_realizado.nombre }}</div>
+        <div class="col-md-6"><strong>Trabajo Programado:</strong> {{ servicio.trabajo_realizado.nombre }}</div>
         <div class="col-md-6"><strong>Cantidad:</strong> {{ servicio.cantidad }}</div>
       </div>
       <div class="row mb-2">
-        <div class="col-md-6"><strong>Observaciones:</strong><br>{{ servicio.observaciones|linebreaksbr }}</div>
-        <div class="col-md-6"><strong>Empleado:</strong> {{ servicio.empleado_asignado.username }}</div>
+        <div class="col-md-6">
+          <strong>Observaciones:</strong><br>
+          {{ servicio.observaciones|linebreaksbr }}
+        </div>
+
+        <div class="col-md-6">
+          <strong>Empleado:</strong>
+          {{ servicio.empleado_asignado.username }}
+        </div>
       </div>
+
+      <div class="row mb-2">
+        <div class="col-md-12">
+          <strong>Ubicación:</strong><br>
+            {{ servicio.obra.localizacion|default:"Sin dirección registrada" }}
+
+            {% if servicio.obra.direccion %}
+              <br>
+              <small class="text-muted">
+                {{ servicio.obra.direccion }}
+              </small>
+            {% endif %}
+
+          <br>
+          <a href="https://www.google.com/maps/search/?api=1&query={{ servicio.obra.localizacion|urlencode }}"
+            target="_blank"
+            class="btn btn-sm btn-outline-primary mt-2">
+            Ver en Google Maps
+          </a>
+        </div>
+      </div>
+
     </div>
   </div>
 

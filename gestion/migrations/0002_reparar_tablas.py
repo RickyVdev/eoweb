@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
                 id SERIAL PRIMARY KEY
             );
             CREATE TABLE IF NOT EXISTS gestion_trabajorealizado (
-                id INTEGER PRIMARY KEY AUTOINCREMENT
+                id SERIAL PRIMARY KEY
             );
             """
         ),
